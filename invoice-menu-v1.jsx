@@ -130,7 +130,7 @@ export default function PharmxAIApp() {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [activeInvoiceId, setActiveInvoiceId] = useState(INVOICE_A_ID);
-  const [isImageViewVisible, setIsImageViewVisible] = useState(true);
+  const [isImageViewVisible, setIsImageViewVisible] = useState(false);
   
   // Refs for Scroll Spy
   const listContainerRef = useRef(null);
