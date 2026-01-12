@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { 
   AlertCircle,
   Search, 
@@ -10,6 +10,7 @@ import {
   ChevronDown, 
   Loader2, 
   Edit3, 
+  RotateCcw,
   Save, 
   X, 
   FileText,
@@ -191,6 +192,243 @@ const INITIAL_DATA = [
 const formatCurrency = (val) => new Intl.NumberFormat('ko-KR').format(Math.round(val));
 const getInvoiceImageData = (invoiceId) =>
   INVOICE_IMAGE_DATA[invoiceId] || INVOICE_IMAGE_DATA[INVOICE_A_ID];
+const MAX_ZOOM_SCALE = 4;
+
+function usePinchZoom({ maxScale = MAX_ZOOM_SCALE } = {}) {
+  const containerRef = useRef(null);
+  const [transform, setTransform] = useState({ scale: 1, translateX: 0, translateY: 0 });
+  const stateRef = useRef(transform);
+  const pointersRef = useRef(new Map());
+  const lastDistanceRef = useRef(null);
+  const lastMidRef = useRef(null);
+  const lastTapRef = useRef(0);
+  const movedRef = useRef(false);
+
+  const clampTransform = useCallback((next) => {
+    const scale = Math.min(maxScale, Math.max(1, next.scale));
+    let translateX = next.translateX;
+    let translateY = next.translateY;
+
+    if (scale <= 1) {
+      return { scale: 1, translateX: 0, translateY: 0 };
+    }
+
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      const maxX = (rect.width * (scale - 1)) / 2;
+      const maxY = (rect.height * (scale - 1)) / 2;
+      translateX = Math.max(-maxX, Math.min(maxX, translateX));
+      translateY = Math.max(-maxY, Math.min(maxY, translateY));
+    }
+
+    return { scale, translateX, translateY };
+  }, [maxScale]);
+
+  const applyTransform = useCallback((next) => {
+    const clamped = clampTransform(next);
+    stateRef.current = clamped;
+    setTransform(clamped);
+  }, [clampTransform]);
+
+  const reset = useCallback(() => {
+    const base = { scale: 1, translateX: 0, translateY: 0 };
+    stateRef.current = base;
+    setTransform(base);
+  }, []);
+
+  const updatePointer = useCallback((pointerId, x, y) => {
+    pointersRef.current.set(pointerId, { x, y });
+  }, []);
+
+  const onPointerDown = useCallback((e) => {
+    if (e.pointerType === 'touch') {
+      e.preventDefault();
+    }
+    if (e.pointerType === 'mouse' && e.button !== 0) {
+      return;
+    }
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    updatePointer(e.pointerId, e.clientX, e.clientY);
+    movedRef.current = false;
+  }, [updatePointer]);
+
+  const onPointerMove = useCallback((e) => {
+    if (!pointersRef.current.has(e.pointerId)) {
+      return;
+    }
+    if (e.pointerType === 'touch') {
+      e.preventDefault();
+    }
+
+    const prevPoint = pointersRef.current.get(e.pointerId);
+    const dx = e.clientX - prevPoint.x;
+    const dy = e.clientY - prevPoint.y;
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+      movedRef.current = true;
+    }
+    updatePointer(e.pointerId, e.clientX, e.clientY);
+
+    const pointers = Array.from(pointersRef.current.values());
+    if (pointers.length === 1) {
+      const current = stateRef.current;
+      if (current.scale <= 1) {
+        return;
+      }
+      applyTransform({
+        scale: current.scale,
+        translateX: current.translateX + dx,
+        translateY: current.translateY + dy
+      });
+      return;
+    }
+
+    if (pointers.length >= 2) {
+      const [p1, p2] = pointers;
+      const distance = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+      const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+
+      if (!lastDistanceRef.current) {
+        lastDistanceRef.current = distance;
+        lastMidRef.current = mid;
+        return;
+      }
+
+      const prev = stateRef.current;
+      const scaleRatio = distance / lastDistanceRef.current;
+      let scale = prev.scale * scaleRatio;
+      let translateX = prev.translateX;
+      let translateY = prev.translateY;
+      const rect = containerRef.current?.getBoundingClientRect();
+
+      if (rect) {
+        const originX = mid.x - rect.left - rect.width / 2;
+        const originY = mid.y - rect.top - rect.height / 2;
+        const relativeScale = scale / prev.scale;
+        translateX += originX * (1 - relativeScale);
+        translateY += originY * (1 - relativeScale);
+      }
+
+      if (lastMidRef.current) {
+        translateX += mid.x - lastMidRef.current.x;
+        translateY += mid.y - lastMidRef.current.y;
+      }
+
+      applyTransform({ scale, translateX, translateY });
+      lastDistanceRef.current = distance;
+      lastMidRef.current = mid;
+    }
+  }, [applyTransform, updatePointer]);
+
+  const onPointerUp = useCallback((e) => {
+    if (pointersRef.current.has(e.pointerId)) {
+      pointersRef.current.delete(e.pointerId);
+    }
+
+    if (pointersRef.current.size < 2) {
+      lastDistanceRef.current = null;
+      lastMidRef.current = null;
+    }
+
+    if (e.pointerType === 'touch' && !movedRef.current && pointersRef.current.size === 0) {
+      const now = Date.now();
+      if (now - lastTapRef.current < 250) {
+        reset();
+        lastTapRef.current = 0;
+      } else {
+        lastTapRef.current = now;
+      }
+    }
+  }, [reset]);
+
+  const onPointerCancel = useCallback((e) => {
+    if (pointersRef.current.has(e.pointerId)) {
+      pointersRef.current.delete(e.pointerId);
+    }
+    lastDistanceRef.current = null;
+    lastMidRef.current = null;
+  }, []);
+
+  const onDoubleClick = useCallback((e) => {
+    e.preventDefault();
+    reset();
+  }, [reset]);
+
+  useEffect(() => {
+    stateRef.current = transform;
+  }, [transform]);
+
+  return {
+    containerRef,
+    transform,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    onPointerCancel,
+    onDoubleClick,
+    reset,
+    isZoomed: transform.scale > 1
+  };
+}
+
+function ZoomableImage({ src, alt, maxScale = MAX_ZOOM_SCALE, compact = false, className = '' }) {
+  const {
+    containerRef,
+    transform,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    onPointerCancel,
+    onDoubleClick,
+    reset,
+    isZoomed
+  } = usePinchZoom({ maxScale });
+
+  useEffect(() => {
+    reset();
+  }, [src, reset]);
+
+  const resetClassName = compact
+    ? 'px-2 py-1 text-[10px] gap-1'
+    : 'px-3 py-1.5 text-xs gap-1.5';
+
+  return (
+    <div
+      ref={containerRef}
+      className={`relative h-full w-full overflow-hidden ${className} ${isZoomed ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}
+      style={{ touchAction: 'none' }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
+      onDoubleClick={onDoubleClick}
+    >
+      <img
+        src={src}
+        alt={alt}
+        draggable={false}
+        className="absolute inset-0 h-full w-full select-none object-contain"
+        style={{
+          transform: `translate(${transform.translateX}px, ${transform.translateY}px) scale(${transform.scale})`,
+          transformOrigin: 'center'
+        }}
+      />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20"></div>
+      {isZoomed && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            reset();
+          }}
+          className={`absolute left-2 top-2 inline-flex items-center rounded-full border border-white/40 bg-black/30 text-white shadow-sm backdrop-blur ${resetClassName}`}
+        >
+          <RotateCcw className={compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} />
+          리셋
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function PharmxAIApp() {
   const [items, setItems] = useState(INITIAL_DATA);
@@ -403,13 +641,13 @@ export default function PharmxAIApp() {
           className={`bg-slate-800 w-full relative transition-all duration-500 ease-in-out shrink-0 overflow-hidden flex items-center justify-center
             ${imageContainerHeightClass}`}
         >
-          <img
+          <ZoomableImage
+            key={activeImageData.src}
             src={activeImageData.src}
             alt="거래명세서 이미지"
-            className="absolute inset-0 h-full w-full object-contain"
-            loading="lazy"
+            maxScale={MAX_ZOOM_SCALE}
+            className="bg-slate-800"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20"></div>
           
           {!isEditing && isImageViewVisible && (
             <button 
@@ -962,7 +1200,7 @@ function EditOverlay({
               </div>
               {isImageVisible && (
                 <div className="absolute bottom-4 right-4 h-40 w-32 overflow-hidden rounded-xl border border-gray-300 shadow-lg">
-                  <EditImagePreview invoiceId={safeInvoiceId} />
+                  <EditImagePreview invoiceId={safeInvoiceId} compact />
                 </div>
               )}
             </div>
@@ -973,20 +1211,18 @@ function EditOverlay({
   );
 }
 
-function EditImagePreview({ invoiceId }) {
+function EditImagePreview({ invoiceId, compact = false }) {
   const safeInvoiceId = invoiceId === INVOICE_B_ID ? INVOICE_B_ID : INVOICE_A_ID;
   const imageData = getInvoiceImageData(safeInvoiceId);
 
   return (
-    <div className="relative h-full w-full bg-slate-800 overflow-hidden flex items-center justify-center">
-      <img
-        src={imageData.src}
-        alt="거래명세서 이미지"
-        className="absolute inset-0 h-full w-full object-contain"
-        loading="lazy"
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20"></div>
-    </div>
+    <ZoomableImage
+      src={imageData.src}
+      alt="거래명세서 이미지"
+      maxScale={MAX_ZOOM_SCALE}
+      compact={compact}
+      className="bg-slate-800"
+    />
   );
 }
 
