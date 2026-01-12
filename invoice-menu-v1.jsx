@@ -92,6 +92,14 @@ const NOTIFICATION_META = {
   }
 };
 
+const SEARCH_SCOPES = [
+  { id: 'all', label: '전체' },
+  { id: 'supplier', label: '공급사' },
+  { id: 'product', label: '상품명' },
+];
+
+const RECENT_SEARCHES = ['비타민하우스', '2026-001', '탁센'];
+
 const INITIAL_DATA = [
   {
     id: 1,
@@ -198,6 +206,9 @@ export default function PharmxAIApp() {
   const [notiTab, setNotiTab] = useState('all');
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchScope, setSearchScope] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Refs for Scroll Spy
   const listContainerRef = useRef(null);
@@ -253,12 +264,15 @@ export default function PharmxAIApp() {
     setIsCameraFlowOpen(true);
     setIsNotiOpen(false);
     setIsMenuOpen(false);
+    setIsSearchOpen(false);
   };
   const closeCameraFlow = () => setIsCameraFlowOpen(false);
 
   const toggleNotiPanel = () => {
     setIsNotiOpen(prev => !prev);
     setIsMenuOpen(false);
+    setIsSearchOpen(false);
+    setIsCameraFlowOpen(false);
   };
   const closeNotiPanel = () => setIsNotiOpen(false);
   const markAllNotificationsRead = () =>
@@ -269,8 +283,18 @@ export default function PharmxAIApp() {
   const toggleMenuPanel = () => {
     setIsMenuOpen(prev => !prev);
     setIsNotiOpen(false);
+    setIsSearchOpen(false);
+    setIsCameraFlowOpen(false);
   };
   const closeMenuPanel = () => setIsMenuOpen(false);
+
+  const toggleSearchPanel = () => {
+    setIsSearchOpen(prev => !prev);
+    setIsNotiOpen(false);
+    setIsMenuOpen(false);
+    setIsCameraFlowOpen(false);
+  };
+  const closeSearchPanel = () => setIsSearchOpen(false);
 
   // Group items
   const invoiceAGroup = items.filter(i => i.invoiceId === INVOICE_A_ID);
@@ -285,6 +309,32 @@ export default function PharmxAIApp() {
   const visibleNotifications = notifications.filter(item => 
     notiTab === 'unread' ? item.unread : true
   );
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const normalizeValue = (value) => `${value ?? ''}`.toLowerCase();
+  const searchResults = normalizedQuery
+    ? items.filter((item) => {
+        if (searchScope === 'supplier') {
+          return normalizeValue(item.invoiceName).includes(normalizedQuery);
+        }
+        if (searchScope === 'product') {
+          return normalizeValue(item.name).includes(normalizedQuery);
+        }
+        if (searchScope === 'invoice') {
+          return (
+            normalizeValue(item.invoiceId).includes(normalizedQuery) ||
+            normalizeValue(item.invoiceName).includes(normalizedQuery)
+          );
+        }
+        return (
+          normalizeValue(item.name).includes(normalizedQuery) ||
+          normalizeValue(item.invoiceName).includes(normalizedQuery) ||
+          normalizeValue(item.invoiceId).includes(normalizedQuery) ||
+          normalizeValue(item.standard).includes(normalizedQuery) ||
+          normalizeValue(item.lot).includes(normalizedQuery) ||
+          normalizeValue(item.note).includes(normalizedQuery)
+        );
+      })
+    : [];
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 font-sans max-w-md mx-auto shadow-2xl overflow-hidden border-x border-gray-200">
@@ -303,7 +353,14 @@ export default function PharmxAIApp() {
           >
             <Camera className="w-5 h-5" />
           </button>
-          <Search className="w-5 h-5 text-gray-500" />
+          <button
+            type="button"
+            onClick={toggleSearchPanel}
+            aria-label="검색"
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <Search className="w-5 h-5" />
+          </button>
           <button
             type="button"
             onClick={toggleNotiPanel}
@@ -424,6 +481,125 @@ export default function PharmxAIApp() {
         )}
 
       </div>
+
+      {isSearchOpen && (
+        <div 
+          className="fixed inset-0 z-[56] bg-black/30"
+          onClick={closeSearchPanel}
+        >
+          <div className="mx-auto flex h-full max-w-md items-start px-4 pt-16">
+            <div 
+              className="w-full rounded-2xl border border-gray-200 bg-white shadow-xl animate-fade-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="키워드를 입력하세요"
+                    autoFocus
+                    className="w-full rounded-full border border-gray-200 bg-gray-50 py-2 pl-9 pr-10 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400 hover:text-gray-600"
+                    >
+                      초기화
+                    </button>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={closeSearchPanel}
+                  className="rounded-full border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50"
+                >
+                  닫기
+                </button>
+              </div>
+
+              <div className="border-b border-gray-100 px-4 py-2">
+                <div className="flex flex-wrap gap-2">
+                  {SEARCH_SCOPES.map((scope) => (
+                    <button
+                      key={scope.id}
+                      type="button"
+                      onClick={() => setSearchScope(scope.id)}
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                        searchScope === scope.id
+                          ? 'border-blue-200 bg-blue-50 text-blue-600'
+                          : 'border-gray-200 bg-white text-gray-500'
+                      }`}
+                    >
+                      {scope.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="max-h-[60vh] overflow-y-auto px-4 py-3">
+                {normalizedQuery ? (
+                  <div>
+                    <div className="mb-3 flex items-center justify-between">
+                      <p className="text-xs font-semibold text-gray-500">검색 결과</p>
+                      <span className="text-[10px] text-gray-400">{searchResults.length}건</span>
+                    </div>
+                    {searchResults.length === 0 ? (
+                      <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-6 text-center text-xs text-gray-400">
+                        일치하는 결과가 없습니다.
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {searchResults.slice(0, 5).map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            className="w-full rounded-xl border border-gray-100 bg-white p-3 text-left shadow-sm hover:bg-gray-50"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-semibold text-gray-800">{item.name}</p>
+                                <p className="text-[11px] text-gray-500">
+                                  {item.invoiceName} · {item.invoiceId}
+                                </p>
+                              </div>
+                              <span className="text-[10px] text-gray-400">
+                                ₩{formatCurrency(item.qty * item.price)}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <p className="mb-2 text-xs font-semibold text-gray-500">최근 검색</p>
+                      <div className="flex flex-wrap gap-2">
+                        {RECENT_SEARCHES.map((keyword) => (
+                          <button
+                            key={keyword}
+                            type="button"
+                            onClick={() => setSearchQuery(keyword)}
+                            className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-50"
+                          >
+                            {keyword}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isMenuOpen && (
         <div 
