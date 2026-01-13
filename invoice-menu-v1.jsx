@@ -1099,10 +1099,19 @@ function EditOverlay({
   onSave 
 }) {
   const safeInvoiceId = invoiceId === INVOICE_B_ID ? INVOICE_B_ID : INVOICE_A_ID;
+  const [isPipExpanded, setIsPipExpanded] = useState(false);
   const modeButtonClass = (mode) =>
     `px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
       viewMode === mode ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
     }`;
+  const pipSizeClass = isPipExpanded ? 'h-72 w-56' : 'h-56 w-44';
+  const pipPaddingClass = isPipExpanded ? 'pr-60' : 'pr-48';
+
+  useEffect(() => {
+    if (viewMode !== 'C') {
+      setIsPipExpanded(false);
+    }
+  }, [viewMode]);
 
   return (
     <div className="absolute inset-0 z-50 bg-white">
@@ -1190,7 +1199,7 @@ function EditOverlay({
 
           {viewMode === 'C' && (
             <div className="relative h-full">
-              <div className="h-full overflow-y-auto pb-32 pr-28">
+              <div className={`h-full overflow-y-auto pb-32 ${pipPaddingClass}`}>
                 <EditItem 
                   data={data} 
                   onChange={onChange} 
@@ -1199,8 +1208,15 @@ function EditOverlay({
                 />
               </div>
               {isImageVisible && (
-                <div className="absolute bottom-4 right-4 h-40 w-32 overflow-hidden rounded-xl border border-gray-300 shadow-lg">
+                <div className={`absolute top-4 right-4 overflow-hidden rounded-2xl border border-gray-300 bg-slate-800 shadow-lg ${pipSizeClass}`}>
                   <EditImagePreview invoiceId={safeInvoiceId} compact />
+                  <button
+                    type="button"
+                    onClick={() => setIsPipExpanded(prev => !prev)}
+                    className="absolute right-2 top-2 rounded-full border border-white/40 bg-black/40 px-2 py-1 text-[10px] font-semibold text-white backdrop-blur"
+                  >
+                    {isPipExpanded ? '축소' : '확대'}
+                  </button>
                 </div>
               )}
             </div>
@@ -1305,20 +1321,20 @@ function EditItem({ data, onChange, onCancel, onSave }) {
     <div className="p-4 bg-blue-50/50 border-l-4 border-blue-600 animate-fade-in scroll-mt-32">
       <div className="flex justify-between items-center mb-3 sticky top-0 z-10 bg-blue-50/95 py-2">
         <h3 className="text-sm font-bold text-gray-800 truncate pr-2">{data.name}</h3>
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <button 
             onClick={onCancel}
-            className="px-3 py-1 text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-full shadow-sm"
+            className="whitespace-nowrap px-3 py-1 text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-full shadow-sm"
           >
             <X className="w-3 h-3 inline-block -mt-0.5 mr-1" />
             취소
           </button>
           <button 
             onClick={onSave}
-            className="px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded-full shadow-sm"
+            className="whitespace-nowrap px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded-full shadow-sm"
           >
             <Save className="w-3 h-3 inline-block -mt-0.5 mr-1" />
-            저장 완료
+            저장
           </button>
         </div>
       </div>
