@@ -45,9 +45,9 @@ const INVOICE_SUMMARIES = [
     supplierId: 'vitaminhouse',
     supplierName: '비타민하우스',
     date: '2026-01-06',
-    title: '단쇄지방산 SCFA455 외 2건',
+    itemCount: 3,        // 품목 종류 수
+    totalQty: 15,        // 총 수량
     totalAmount: 297500,
-    totalQty: 15,
     status: 'completed',
     taxType: 'separate'
   },
@@ -56,9 +56,9 @@ const INVOICE_SUMMARIES = [
     supplierId: 'gc',
     supplierName: '(주)녹십자',
     date: '2026-01-06',
-    title: '탁센 연질캡슐 10C 외 2건',
-    totalAmount: 313500,
+    itemCount: 3,
     totalQty: 170,
+    totalAmount: 313500,
     status: 'analyzing',
     taxType: 'none'
   },
@@ -67,9 +67,9 @@ const INVOICE_SUMMARIES = [
     supplierId: 'yuhan',
     supplierName: '(주)유한양행',
     date: '2026-01-05',
-    title: '안티푸라민 로션 외 5건',
-    totalAmount: 320000,
+    itemCount: 6,
     totalQty: 50,
+    totalAmount: 320000,
     status: 'completed',
     taxType: 'included'
   },
@@ -78,9 +78,9 @@ const INVOICE_SUMMARIES = [
     supplierId: 'vitaminhouse',
     supplierName: '비타민하우스',
     date: '2026-01-04',
-    title: '비타민D 2000IU 외 1건',
-    totalAmount: 45000,
+    itemCount: 2,
     totalQty: 10,
+    totalAmount: 45000,
     status: 'completed',
     taxType: 'separate'
   },
@@ -89,9 +89,31 @@ const INVOICE_SUMMARIES = [
     supplierId: 'chong',
     supplierName: '종근당',
     date: '2025-12-28',
-    title: '벤포벨 S정 외 3건',
-    totalAmount: 560000,
+    itemCount: 4,
     totalQty: 40,
+    totalAmount: 560000,
+    status: 'completed',
+    taxType: 'separate'
+  },
+  {
+    id: 'INV-2026-006',
+    supplierId: 'gc',
+    supplierName: '(주)녹십자',
+    date: '2026-01-03',
+    itemCount: 5,
+    totalQty: 85,
+    totalAmount: 425000,
+    status: 'completed',
+    taxType: 'separate'
+  },
+  {
+    id: 'INV-2026-007',
+    supplierId: 'yuhan',
+    supplierName: '(주)유한양행',
+    date: '2026-01-02',
+    itemCount: 3,
+    totalQty: 30,
+    totalAmount: 180000,
     status: 'completed',
     taxType: 'separate'
   }
@@ -979,7 +1001,7 @@ function SupplierListView({ onSelectInvoice }) {
   const [startDate, setStartDate] = useState('2026-01-01');
   const [endDate, setEndDate] = useState('2026-01-31');
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('date'); // 'date' | 'amount'
+  const [sortBy, setSortBy] = useState('count'); // 'count' | 'amount'
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // --- Filtering Logic ---
@@ -998,33 +1020,58 @@ function SupplierListView({ onSelectInvoice }) {
       data = data.filter(item => item.date >= startDate && item.date <= endDate);
     }
 
-    // 3. Search Filter
+    // 3. Search Filter (공급사명으로만 검색)
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       data = data.filter(item => 
-        item.title.toLowerCase().includes(term) || 
         item.supplierName.toLowerCase().includes(term) ||
         item.id.toLowerCase().includes(term)
       );
     }
 
-    // 4. Sort
-    data = [...data].sort((a, b) => {
-      if (sortBy === 'date') return new Date(b.date) - new Date(a.date);
-      if (sortBy === 'amount') return b.totalAmount - a.totalAmount;
-      return 0;
-    });
-
     return data;
-  }, [selectedSupplier, dateRangeType, selectedMonth, startDate, endDate, searchTerm, sortBy]);
+  }, [selectedSupplier, dateRangeType, selectedMonth, startDate, endDate, searchTerm]);
 
-  // --- Statistics Calculation ---
+  // --- 공급사별 통계 집계 ---
+  const supplierStats = useMemo(() => {
+    const grouped = {};
+    
+    filteredData.forEach(invoice => {
+      if (!grouped[invoice.supplierId]) {
+        grouped[invoice.supplierId] = {
+          supplierId: invoice.supplierId,
+          supplierName: invoice.supplierName,
+          invoiceCount: 0,      // 거래명세서 건수
+          itemCount: 0,         // 총 품목 수
+          totalQty: 0,          // 총 수량
+          totalAmount: 0        // 총 금액
+        };
+      }
+      grouped[invoice.supplierId].invoiceCount += 1;
+      grouped[invoice.supplierId].itemCount += invoice.itemCount || 0;
+      grouped[invoice.supplierId].totalQty += invoice.totalQty;
+      grouped[invoice.supplierId].totalAmount += invoice.totalAmount;
+    });
+    
+    // 정렬: 금액순 또는 거래명세서 건수순
+    let result = Object.values(grouped);
+    if (sortBy === 'amount') {
+      result.sort((a, b) => b.totalAmount - a.totalAmount);
+    } else {
+      result.sort((a, b) => b.invoiceCount - a.invoiceCount);
+    }
+    
+    return result;
+  }, [filteredData, sortBy]);
+
+  // --- 전체 통계 ---
   const stats = useMemo(() => {
     return filteredData.reduce((acc, curr) => ({
-      count: acc.count + 1,
-      amount: acc.amount + curr.totalAmount,
-      qty: acc.qty + curr.totalQty
-    }), { count: 0, amount: 0, qty: 0 });
+      invoiceCount: acc.invoiceCount + 1,
+      itemCount: acc.itemCount + (curr.itemCount || 0),
+      totalQty: acc.totalQty + curr.totalQty,
+      totalAmount: acc.totalAmount + curr.totalAmount
+    }), { invoiceCount: 0, itemCount: 0, totalQty: 0, totalAmount: 0 });
   }, [filteredData]);
 
   // Display text for the filter bar
@@ -1032,29 +1079,6 @@ function SupplierListView({ onSelectInvoice }) {
   const currentDateText = dateRangeType === 'month' 
     ? selectedMonth.replace('-', '.') 
     : `${startDate.slice(5).replace('-', '.')}~${endDate.slice(5).replace('-', '.')}`;
-
-  const getStatusBadge = (status) => {
-    switch(status) {
-      case 'completed': 
-        return (
-          <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full flex items-center gap-1 border border-green-200">
-            <CheckCircle2 className="w-3 h-3"/> 완료
-          </span>
-        );
-      case 'analyzing':
-        return (
-          <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full flex items-center gap-1 border border-blue-200">
-            <Loader2 className="w-3 h-3 animate-spin"/> 분석중
-          </span>
-        );
-      default:
-        return (
-          <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-            대기
-          </span>
-        );
-    }
-  };
 
   return (
     <div className="flex flex-col h-full animate-fade-in">
@@ -1149,22 +1173,27 @@ function SupplierListView({ onSelectInvoice }) {
         
         {/* Statistics Dashboard */}
         <div className="p-4 bg-gray-50">
+          {/* 전체 통계 대시보드 */}
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 mb-4">
             <h3 className="text-xs font-bold text-gray-400 mb-3 flex items-center gap-1">
-              <BarChart3 className="w-3.5 h-3.5" /> 기간 내 통계
+              <BarChart3 className="w-3.5 h-3.5" /> 기간 내 전체 통계
             </h3>
-            <div className="grid grid-cols-3 divide-x divide-gray-100">
+            <div className="grid grid-cols-4 divide-x divide-gray-100">
               <div className="text-center px-1">
-                <p className="text-[10px] text-gray-500 mb-1">총 건수</p>
-                <p className="text-lg font-bold text-gray-800">{stats.count}<span className="text-xs font-normal text-gray-400 ml-0.5">건</span></p>
+                <p className="text-[10px] text-gray-500 mb-1">거래명세서</p>
+                <p className="text-lg font-bold text-gray-800">{stats.invoiceCount}<span className="text-xs font-normal text-gray-400 ml-0.5">건</span></p>
+              </div>
+              <div className="text-center px-1">
+                <p className="text-[10px] text-gray-500 mb-1">품목 수</p>
+                <p className="text-lg font-bold text-gray-800">{stats.itemCount}<span className="text-xs font-normal text-gray-400 ml-0.5">개</span></p>
               </div>
               <div className="text-center px-1">
                 <p className="text-[10px] text-gray-500 mb-1">총 수량</p>
-                <p className="text-lg font-bold text-gray-800">{stats.qty}<span className="text-xs font-normal text-gray-400 ml-0.5">개</span></p>
+                <p className="text-lg font-bold text-gray-800">{stats.totalQty}<span className="text-xs font-normal text-gray-400 ml-0.5">개</span></p>
               </div>
               <div className="text-center px-1">
                 <p className="text-[10px] text-gray-500 mb-1">총 매입액</p>
-                <p className="text-lg font-bold text-blue-600">{formatCurrency(stats.amount)}</p>
+                <p className="text-base font-bold text-blue-600">₩{formatCurrency(stats.totalAmount)}</p>
               </div>
             </div>
           </div>
@@ -1175,7 +1204,7 @@ function SupplierListView({ onSelectInvoice }) {
                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                <input 
                  type="text" 
-                 placeholder="명세서 번호, 제품명 검색" 
+                 placeholder="공급사명 검색" 
                  value={searchTerm}
                  onChange={(e) => setSearchTerm(e.target.value)}
                  className="w-full bg-white border border-gray-200 rounded-full pl-9 pr-3 py-2 text-xs focus:outline-none focus:border-blue-500 shadow-sm"
@@ -1187,41 +1216,57 @@ function SupplierListView({ onSelectInvoice }) {
                )}
              </div>
              <button 
-                onClick={() => setSortBy(prev => prev === 'date' ? 'amount' : 'date')}
+                onClick={() => setSortBy(prev => prev === 'count' ? 'amount' : 'count')}
                 className="flex items-center gap-1 text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-3 py-2 rounded-full shadow-sm"
              >
                 <ArrowUpDown className="w-3.5 h-3.5" />
-                {sortBy === 'date' ? '최신순' : '금액순'}
+                {sortBy === 'count' ? '건수순' : '금액순'}
              </button>
           </div>
 
-          {/* List Items */}
+          {/* 공급사별 카드 목록 */}
           <div className="space-y-3 pb-10">
-            {filteredData.length > 0 ? (
-              filteredData.map(item => (
+            {supplierStats.length > 0 ? (
+              supplierStats.map(supplier => (
                 <div 
-                  key={item.id} 
-                  onClick={() => onSelectInvoice(item.id)}
+                  key={supplier.supplierId} 
+                  onClick={() => onSelectInvoice(supplier.supplierId)}
                   className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 active:bg-gray-50 transition-colors cursor-pointer"
                 >
-                  <div className="flex justify-between items-start mb-2">
+                  {/* 공급사명 헤더 */}
+                  <div className="flex justify-between items-center mb-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{item.supplierName}</span>
-                      <span className="text-xs text-gray-400">{formatDate(item.date)}</span>
+                      <Building2 className="w-4 h-4 text-blue-600" />
+                      <h4 className="font-bold text-gray-800">{supplier.supplierName}</h4>
                     </div>
-                    {getStatusBadge(item.status)}
+                    <ChevronDown className="w-4 h-4 text-gray-400 -rotate-90" />
                   </div>
-                  <h4 className="font-bold text-gray-800 text-sm mb-3 truncate">{item.title}</h4>
-                  <div className="flex justify-between items-end border-t border-gray-50 pt-3">
-                    <span className="text-xs text-gray-400">총 {item.totalQty}개 품목</span>
-                    <span className="text-lg font-bold text-gray-900">₩{formatCurrency(item.totalAmount)}</span>
+                  
+                  {/* 통계 그리드 (2x2) */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-gray-50 rounded-lg p-2.5 text-center">
+                      <p className="text-[10px] text-gray-500 mb-0.5">거래명세서</p>
+                      <p className="text-sm font-bold text-gray-800">{supplier.invoiceCount}<span className="text-xs font-normal text-gray-400 ml-0.5">건</span></p>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-2.5 text-center">
+                      <p className="text-[10px] text-gray-500 mb-0.5">품목 수</p>
+                      <p className="text-sm font-bold text-gray-800">{supplier.itemCount}<span className="text-xs font-normal text-gray-400 ml-0.5">개</span></p>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-2.5 text-center">
+                      <p className="text-[10px] text-gray-500 mb-0.5">총 수량</p>
+                      <p className="text-sm font-bold text-gray-800">{supplier.totalQty}<span className="text-xs font-normal text-gray-400 ml-0.5">개</span></p>
+                    </div>
+                    <div className="bg-blue-50 rounded-lg p-2.5 text-center border border-blue-100">
+                      <p className="text-[10px] text-blue-600 mb-0.5">총 금액</p>
+                      <p className="text-sm font-bold text-blue-600">₩{formatCurrency(supplier.totalAmount)}</p>
+                    </div>
                   </div>
                 </div>
               ))
             ) : (
               <div className="text-center py-10 text-gray-400">
-                <FileText className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                <p className="text-xs">조회된 내역이 없습니다.</p>
+                <Building2 className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                <p className="text-xs">조회된 공급사가 없습니다.</p>
               </div>
             )}
           </div>

@@ -641,6 +641,7 @@ export default function PharmxAIApp({ onMenuChange }) {
       <header className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 z-50 shadow-sm shrink-0">
         <div className="flex items-center gap-2">
           <h1 className="text-lg font-bold text-blue-900 tracking-tight">PharmxAI</h1>
+          <span className="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">거래명세서 관리</span>
         </div>
         <div className="flex gap-4">
           <button
@@ -1165,12 +1166,25 @@ function InvoiceSection({
     }
   };
 
+  const getStatusAccent = (status) => {
+    switch (status) {
+      case 'completed':
+        return 'border-green-500';
+      case 'analyzing':
+        return 'border-blue-500';
+      case 'failed':
+        return 'border-red-500';
+      default:
+        return 'border-gray-300';
+    }
+  };
+
   const supplyValue = hasSeparateTax ? totalAmount - taxAmount : totalAmount;
 
   return (
-    <div className="mb-2">
+    <div className={`mb-4 border-l-4 ${getStatusAccent(status)} pl-3`}>
       {/* Section Header */}
-      <div className="bg-gray-50 sticky top-0 z-30 px-4 py-3 border-b border-gray-200 shadow-sm flex flex-col gap-2">
+      <div className="bg-gray-50 sticky top-0 z-30 px-4 py-3 border-b-2 border-gray-200 shadow-sm flex flex-col gap-2">
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -1216,7 +1230,7 @@ function InvoiceSection({
       </div>
 
       {/* Items List */}
-      <div className="bg-white divide-y divide-gray-100">
+      <div className="bg-white divide-y divide-gray-100 border-l border-gray-200">
         {items.map((item) => (
           <ViewItem 
             key={item.id} 
