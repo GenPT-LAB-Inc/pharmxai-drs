@@ -42,7 +42,7 @@ const INVOICE_META = {
     hasSeparateTax: false,
     taxAmount: 0,
     status: 'failed',
-    failureReason: 'OCR API 타임아웃'
+    failureReason: '거래명세서 중복 업로드'
   }
 };
 
@@ -120,7 +120,7 @@ const STATUS_FILTER_OPTIONS = [
   { id: 'all', label: '전체' },
   { id: 'analyzing', label: 'AI분석 중' },
   { id: 'completed', label: '완료' },
-  { id: 'failed', label: '실패' }
+  { id: 'failed', label: '미처리' }
 ];
 
 const RECENT_SEARCHES = ['비타민하우스', '2026-001', '탁센'];
@@ -213,7 +213,7 @@ const INITIAL_DATA = [
   {
     id: 7,
     invoiceId: INVOICE_C_ID,
-    invoiceName: '동일이미지 오류 | 2026-003',
+    invoiceName: ' | ',
     status: 'failed',
     name: '',
     standard: '',
@@ -810,7 +810,7 @@ export default function PharmxAIApp({ onMenuChange }) {
           {isInvoiceVisible(INVOICE_C_ID) && (
             <InvoiceSection 
               invoiceId={INVOICE_C_ID}
-              title="동일이미지 오류 | 2026-003" 
+              title=" | " 
               status={INVOICE_META[INVOICE_C_ID].status} 
               totalAmount={getInvoiceTotal(invoiceCGroup)}
               taxAmount={INVOICE_META[INVOICE_C_ID].taxAmount}
@@ -1156,11 +1156,11 @@ function InvoiceSection({
   const getStatusBadge = (status) => {
     switch(status) {
       case 'completed': 
-        return <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold border border-green-200">처리 완료</span>;
+        return <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold border border-green-200">완료</span>;
       case 'analyzing':
         return <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold border border-blue-200 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin"/>AI 분석중</span>;
       case 'failed':
-        return <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-bold border border-red-200">처리 실패</span>;
+        return <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-bold border border-red-200">미처리</span>;
       default:
         return <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">대기</span>;
     }
@@ -1184,36 +1184,12 @@ function InvoiceSection({
   return (
     <div className={`mb-4 border-l-4 ${getStatusAccent(status)} pl-3`}>
       {/* Section Header */}
-      <div className="bg-gray-50 sticky top-0 z-30 px-4 py-3 border-b-2 border-gray-200 shadow-sm flex flex-col gap-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              {getStatusBadge(status)}
-              <span className="text-xs text-gray-400 font-medium">No. {title.split('|')[1]}</span>
-            </div>
-            <h2 className="text-sm font-bold text-gray-800">{title.split('|')[0]}</h2>
+      <div className="bg-gray-50 sticky top-0 z-30 px-4 py-2 border-b-2 border-gray-200 shadow-sm flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {getStatusBadge(status)}
+            <span className="text-xs text-gray-400 font-medium">No. {title.split('|')[1]}</span>
           </div>
-          
-          <div className="text-right">
-             {hasSeparateTax && (
-               <div className="flex flex-col items-end mb-1">
-                 <div className="flex gap-2 text-[10px] text-gray-400">
-                   <span>공급가액 {formatCurrency(supplyValue)}</span>
-                   <span className="w-px h-3 bg-gray-200 inline-block"></span>
-                   <span>세액 {formatCurrency(taxAmount)}</span>
-                 </div>
-               </div>
-             )}
-             
-             <div className="flex items-center justify-end gap-1">
-                <span className="text-[10px] text-gray-400">총 합계</span>
-                <p className="text-sm font-bold text-gray-900">₩{formatCurrency(totalAmount)}</p>
-             </div>
-          </div>
-        </div>
-
-        {/* Toolbar: Image Toggle Only */}
-        <div className="flex justify-end border-t border-gray-50 pt-2">
           <button 
             onClick={onToggleImage}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors border ${isImageVisible ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-gray-50 border-gray-200 text-gray-400'}`}
@@ -1222,9 +1198,26 @@ function InvoiceSection({
           </button>
         </div>
 
+        <div className="flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-base font-bold text-gray-900 truncate">{title.split('|')[0]}</h2>
+            {hasSeparateTax && (
+              <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-600">
+                <span>공급가액 {formatCurrency(supplyValue)}</span>
+                <span className="w-px h-3 bg-gray-300 inline-block"></span>
+                <span>세액 {formatCurrency(taxAmount)}</span>
+              </div>
+            )}
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] font-semibold text-gray-500">총 합계</p>
+            <p className="text-lg font-bold text-gray-900">₩{formatCurrency(totalAmount)}</p>
+          </div>
+        </div>
+
         {status === 'failed' && failureReason && (
-          <div className="mt-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-[11px] text-red-600">
-            실패 사유: {failureReason}
+          <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-[11px] text-red-600">
+            미처리 사유: {failureReason}
           </div>
         )}
       </div>
