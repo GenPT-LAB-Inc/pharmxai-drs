@@ -1116,6 +1116,8 @@ export default function PharmxAIApp({ onMenuChange }) {
                   onClick={() => {
                     if (label === '공급사 관리' && onMenuChange) {
                       onMenuChange('supplier');
+                    } else if (label === '유효기간 점검' && onMenuChange) {
+                      onMenuChange('expiry');
                     } else if (label === '거래명세서 관리') {
                       closeMenuPanel();
                     }
