@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Bell,
   Camera,
@@ -44,6 +44,170 @@ const WEEKLY_UPLOAD_SUMMARY = [
     counts: { analyzing: 1, completed: 1, failed: 0 },
   },
 ];
+
+const EXPIRY_BASE_DATE = '2026-01-06';
+const EXPIRY_MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+const DASHBOARD_EXPIRY_ITEMS = [
+  {
+    id: 1,
+    supplierName: '비타민하우스',
+    productName: '프리미엄 오메가3',
+    lot: 'V203901',
+    qty: 12,
+    expiry: '2025-12-20',
+  },
+  {
+    id: 2,
+    supplierName: '(주)녹십자',
+    productName: '탁센 연질캡슐',
+    lot: 'C998877',
+    qty: 50,
+    expiry: '2026-02-15',
+  },
+  {
+    id: 3,
+    supplierName: '(주)유한양행',
+    productName: '삐콤씨 플러스',
+    lot: 'Y554433',
+    qty: 30,
+    expiry: '2026-04-10',
+  },
+  {
+    id: 4,
+    supplierName: '종근당',
+    productName: '제놀 쿨 파스',
+    lot: 'E554433',
+    qty: 80,
+    expiry: '2026-06-25',
+  },
+  {
+    id: 5,
+    supplierName: '비타민하우스',
+    productName: '멀티비타민 미네랄',
+    lot: 'V203112',
+    qty: 20,
+    expiry: '2026-07-20',
+  },
+  {
+    id: 6,
+    supplierName: '(주)녹십자',
+    productName: '비맥스 메타정',
+    lot: 'D112233',
+    qty: 18,
+    expiry: '2026-09-15',
+  },
+  {
+    id: 7,
+    supplierName: '(주)유한양행',
+    productName: '메가트루포커스정',
+    lot: 'Y667788',
+    qty: 26,
+    expiry: '2027-01-02',
+  },
+  {
+    id: 8,
+    supplierName: '종근당',
+    productName: '고운자임맘정',
+    lot: 'C445566',
+    qty: 40,
+    expiry: '2027-01-04',
+  },
+  {
+    id: 9,
+    supplierName: '비타민하우스',
+    productName: '단쇄지방산 SCFA455',
+    lot: 'A203947',
+    qty: 15,
+    expiry: '2027-03-12',
+  },
+  {
+    id: 10,
+    supplierName: '(주)녹십자',
+    productName: '판콜 에이',
+    lot: 'G110022',
+    qty: 60,
+    expiry: '2027-06-30',
+  },
+  {
+    id: 11,
+    supplierName: '(주)유한양행',
+    productName: '에어비타',
+    lot: 'Y220019',
+    qty: 22,
+    expiry: '2027-10-05',
+  },
+  {
+    id: 12,
+    supplierName: '종근당',
+    productName: '락토핏 생유산균',
+    lot: 'C550011',
+    qty: 28,
+    expiry: '2027-12-15',
+  },
+  {
+    id: 13,
+    supplierName: '비타민하우스',
+    productName: '콜라겐 플러스',
+    lot: 'V330099',
+    qty: 24,
+    expiry: '2028-01-20',
+  },
+  {
+    id: 14,
+    supplierName: '(주)녹십자',
+    productName: '지씨가르시니아',
+    lot: 'G770031',
+    qty: 14,
+    expiry: '2028-06-01',
+  },
+  {
+    id: 15,
+    supplierName: '(주)유한양행',
+    productName: '웰씨 아연',
+    lot: 'Y880212',
+    qty: 32,
+    expiry: '2029-01-15',
+  },
+  {
+    id: 16,
+    supplierName: '종근당',
+    productName: '프리바이오틱스',
+    lot: 'C900211',
+    qty: 18,
+    expiry: '2030-05-10',
+  },
+];
+
+const EXPIRY_GROUPS = [
+  { id: 'risk', title: '위험', range: '6개월 미만' },
+  { id: 'caution', title: '주의', range: '6개월 이상 ~ 12개월 미만' },
+  { id: 'normal', title: '보통', range: '12개월 이상 ~ 24개월 미만' },
+  { id: 'safe', title: '안전', range: '24개월 이상' },
+];
+
+const EXPIRY_GROUP_TONE = {
+  risk: {
+    card: 'bg-red-50 border-red-200',
+    text: 'text-red-700',
+    badge: 'bg-red-100 text-red-700 border border-red-200',
+  },
+  caution: {
+    card: 'bg-amber-50 border-amber-200',
+    text: 'text-amber-700',
+    badge: 'bg-amber-50 text-amber-700 border border-amber-200',
+  },
+  normal: {
+    card: 'bg-blue-50 border-blue-200',
+    text: 'text-blue-700',
+    badge: 'bg-blue-50 text-blue-700 border border-blue-200',
+  },
+  safe: {
+    card: 'bg-green-50 border-green-200',
+    text: 'text-green-700',
+    badge: 'bg-green-100 text-green-700 border border-green-200',
+  },
+};
 
 const REPORT_MONTH_KEYS = [
   '2025-08',
@@ -221,6 +385,37 @@ const formatDateLabel = (value) => {
   const day = String(date.getDate()).padStart(2, '0');
   const dayLabel = DAY_LABELS[date.getDay()];
   return `${year}.${month}.${day} (${dayLabel})`;
+};
+
+const formatShortDate = (value) => {
+  if (!value) return '-';
+  return value.replace(/-/g, '.');
+};
+
+const parseDate = (value) => new Date(`${value}T00:00:00`);
+
+const addDays = (value, amount) => {
+  const date = parseDate(value);
+  date.setDate(date.getDate() + amount);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const EXPIRY_PREVIOUS_BASE_DATE = addDays(EXPIRY_BASE_DATE, -7);
+
+const getRemainingDays = (expiryDate, baseDate = EXPIRY_BASE_DATE) => {
+  const expiry = parseDate(expiryDate);
+  const base = parseDate(baseDate);
+  return Math.ceil((expiry - base) / EXPIRY_MS_PER_DAY);
+};
+
+const getExpiryGroupId = (days) => {
+  if (days < 180) return 'risk';
+  if (days < 365) return 'caution';
+  if (days < 730) return 'normal';
+  return 'safe';
 };
 
 const getStatusBadge = (status) => {
@@ -557,6 +752,8 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
   const [isAmountCumulativeEnabled, setIsAmountCumulativeEnabled] = useState(false);
   const [isVolumeYoYEnabled, setIsVolumeYoYEnabled] = useState(true);
   const [isVolumeCumulativeEnabled, setIsVolumeCumulativeEnabled] = useState(false);
+  const [isRiskNewOpen, setIsRiskNewOpen] = useState(false);
+  const [isCautionNewOpen, setIsCautionNewOpen] = useState(false);
 
   const openCameraFlow = () => {
     setIsCameraFlowOpen(true);
@@ -643,6 +840,68 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
   const weeklyVisibleItems = isWeeklyExpanded
     ? WEEKLY_UPLOAD_SUMMARY
     : WEEKLY_UPLOAD_SUMMARY.slice(0, 1);
+
+  const expiryItems = useMemo(
+    () =>
+      DASHBOARD_EXPIRY_ITEMS.map((item) => {
+        const remainingDays = getRemainingDays(item.expiry, EXPIRY_BASE_DATE);
+        const previousRemainingDays = getRemainingDays(
+          item.expiry,
+          EXPIRY_PREVIOUS_BASE_DATE
+        );
+        return {
+          ...item,
+          remainingDays,
+          groupId: getExpiryGroupId(remainingDays),
+          previousGroupId: getExpiryGroupId(previousRemainingDays),
+        };
+      }),
+    []
+  );
+
+  const expirySnapshot = useMemo(() => {
+    const grouped = EXPIRY_GROUPS.reduce((acc, group) => {
+      acc[group.id] = [];
+      return acc;
+    }, {});
+
+    expiryItems.forEach((item) => {
+      if (grouped[item.groupId]) {
+        grouped[item.groupId].push(item);
+      }
+    });
+
+    const groupStats = EXPIRY_GROUPS.reduce((acc, group) => {
+      const items = grouped[group.id] || [];
+      acc[group.id] = {
+        count: items.length,
+        totalQty: sumValues(items.map((entry) => entry.qty)),
+      };
+      return acc;
+    }, {});
+
+    const newRiskEntries = expiryItems
+      .filter((item) => item.groupId === 'risk' && item.previousGroupId !== 'risk')
+      .sort((a, b) => a.remainingDays - b.remainingDays);
+    const newCautionEntries = expiryItems
+      .filter((item) => item.groupId === 'caution' && item.previousGroupId !== 'caution')
+      .sort((a, b) => a.remainingDays - b.remainingDays);
+
+    return {
+      groupStats,
+      newRiskEntries,
+      newCautionEntries,
+    };
+  }, [expiryItems]);
+
+  useEffect(() => {
+    if (expirySnapshot.newRiskEntries.length > 0) {
+      setIsRiskNewOpen(true);
+    }
+    if (expirySnapshot.newCautionEntries.length > 0) {
+      setIsCautionNewOpen(true);
+    }
+  }, [expirySnapshot.newRiskEntries.length, expirySnapshot.newCautionEntries.length]);
 
   const currentMonthRangeLabel = formatMonthRangeLabel(REPORT_MONTH_KEYS);
   const previousMonthRangeLabel = formatMonthRangeLabel(YOY_MONTH_KEYS);
@@ -822,6 +1081,165 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        {/* 유효기간 스냅샷 */}
+        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-gray-900">유효기간 점검</p>
+              <p className="text-[10px] text-gray-400">
+                기준 {formatDateLabel(EXPIRY_BASE_DATE)}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onMenuChange?.('expiry')}
+              className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700"
+            >
+              점검 보기
+              <ChevronDown className="h-3 w-3 -rotate-90" />
+            </button>
+          </div>
+          <div className="px-4 py-2.5 space-y-2">
+            <p className="text-[9px] text-gray-400 leading-tight">
+              위험 &lt;6개월 · 주의 6~12개월 · 보통 12~24개월 · 안전 24개월 이상
+            </p>
+            <div className="grid grid-cols-2 gap-1.5">
+              {EXPIRY_GROUPS.map((group) => {
+                const tone = EXPIRY_GROUP_TONE[group.id];
+                const stats = expirySnapshot.groupStats[group.id];
+                return (
+                  <div
+                    key={group.id}
+                    className={`rounded-lg border px-2 py-1.5 ${tone.card}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <p className={`text-[10px] font-semibold ${tone.text}`}>
+                        {group.title}
+                      </p>
+                      <p className="text-sm font-bold text-gray-900">
+                        {formatNumber(stats.count)}건
+                      </p>
+                    </div>
+                    <div className="mt-0.5 flex items-center justify-between text-[9px] text-gray-400">
+                      <span>{group.range}</span>
+                      <span>{formatNumber(stats.totalQty)}개</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="pt-1.5 border-t border-gray-100">
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] font-semibold text-gray-700">위험/주의 신규 진입</p>
+                <span className="text-[10px] text-gray-400">
+                  지난 7일 기준
+                </span>
+              </div>
+              <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setIsRiskNewOpen((prev) => !prev)}
+                  className="flex items-center justify-between gap-2 rounded-lg border border-red-100 bg-red-50 px-2 py-1.5 text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-semibold text-red-700">
+                      위험 신규 진입
+                    </span>
+                    <span className="rounded-full border border-red-200 bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700">
+                      {formatNumber(expirySnapshot.newRiskEntries.length)}건
+                    </span>
+                  </div>
+                  <ChevronDown
+                    className={`h-3 w-3 text-red-600 transition-transform ${
+                      isRiskNewOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsCautionNewOpen((prev) => !prev)}
+                  className="flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-2 py-1.5 text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-semibold text-amber-700">
+                      주의 신규 진입
+                    </span>
+                    <span className="rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                      {formatNumber(expirySnapshot.newCautionEntries.length)}건
+                    </span>
+                  </div>
+                  <ChevronDown
+                    className={`h-3 w-3 text-amber-600 transition-transform ${
+                      isCautionNewOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="mt-1.5 space-y-1.5">
+                {isRiskNewOpen && (
+                  <div className="rounded-lg border border-red-100 bg-red-50/40 p-1.5">
+                    {expirySnapshot.newRiskEntries.length === 0 && (
+                      <p className="text-[10px] text-red-600">
+                        금주 신규 진입 없음
+                      </p>
+                    )}
+                    <div className="space-y-1.5">
+                      {expirySnapshot.newRiskEntries.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between gap-3 rounded-md border border-red-100 bg-white/70 px-2.5 py-1.5"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold text-gray-900 truncate">
+                              {item.productName}
+                            </p>
+                            <p className="text-[10px] text-gray-400">
+                              유효기간 {formatShortDate(item.expiry)}
+                            </p>
+                          </div>
+                          <span className="text-[10px] font-semibold text-gray-600">
+                            {formatNumber(item.qty)}개
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {isCautionNewOpen && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50/40 p-1.5">
+                    {expirySnapshot.newCautionEntries.length === 0 && (
+                      <p className="text-[10px] text-amber-600">
+                        금주 신규 진입 없음
+                      </p>
+                    )}
+                    <div className="space-y-1.5">
+                      {expirySnapshot.newCautionEntries.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between gap-3 rounded-md border border-amber-100 bg-white/70 px-2.5 py-1.5"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold text-gray-900 truncate">
+                              {item.productName}
+                            </p>
+                            <p className="text-[10px] text-gray-400">
+                              유효기간 {formatShortDate(item.expiry)}
+                            </p>
+                          </div>
+                          <span className="text-[10px] font-semibold text-gray-600">
+                            {formatNumber(item.qty)}개
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
