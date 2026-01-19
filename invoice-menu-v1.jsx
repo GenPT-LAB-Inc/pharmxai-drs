@@ -23,7 +23,7 @@ const INVOICE_A_ID = 'INV-2026-001';
 const INVOICE_B_ID = 'INV-2026-002';
 const INVOICE_C_ID = 'INV-2026-003';
 const DAILY_UPLOAD_INVOICE_IDS = [INVOICE_A_ID, INVOICE_B_ID, INVOICE_C_ID];
-const DAILY_UPLOAD_DATE_LABEL = '2026.01.06 (화)';
+const DEFAULT_DATE_LABEL = '2026.01.06 (화)';
 
 // 명세서별 메타 데이터 (OCR 결과로 추출된 총 세액 정보 등)
 const INVOICE_META = {
@@ -469,7 +469,7 @@ function ZoomableImage({ src, alt, maxScale = MAX_ZOOM_SCALE, compact = false, c
   );
 }
 
-export default function PharmxAIApp({ onMenuChange }) {
+export default function PharmxAIApp({ onMenuChange, selectedDate }) {
   const [items, setItems] = useState(INITIAL_DATA);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
@@ -493,6 +493,8 @@ export default function PharmxAIApp({ onMenuChange }) {
   const [dailyStatusFilter, setDailyStatusFilter] = useState('all');
   const [dailyExpandedInvoiceIds, setDailyExpandedInvoiceIds] = useState({});
   const [dailyImageVisibilityById, setDailyImageVisibilityById] = useState({});
+
+  const activeDateLabel = selectedDate?.label || DEFAULT_DATE_LABEL;
 
   // Computed Values
   const isEditing = editingId !== null;
@@ -755,7 +757,7 @@ export default function PharmxAIApp({ onMenuChange }) {
           <div className="bg-white px-4 py-3 border-b border-gray-200 flex items-start justify-between">
             <div>
               <p className="text-sm font-bold text-gray-900">당일 업로드 조회</p>
-              <p className="text-[10px] text-gray-400">{DAILY_UPLOAD_DATE_LABEL}</p>
+              <p className="text-[10px] text-gray-400">{activeDateLabel}</p>
             </div>
             <button
               type="button"
@@ -836,7 +838,7 @@ export default function PharmxAIApp({ onMenuChange }) {
           <div className="relative z-40 bg-white px-4 py-2 flex items-center justify-between border-b border-gray-100 shrink-0">
             <div className="flex items-center gap-1 text-gray-700 font-medium text-sm bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
               <Calendar className="w-4 h-4 text-gray-500" />
-              <span>2026.01.06 (화)</span>
+              <span>{activeDateLabel}</span>
               <ChevronDown className="w-3 h-3 text-gray-400" />
             </div>
             <div className="flex items-center gap-2">

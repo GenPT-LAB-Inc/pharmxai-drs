@@ -1,53 +1,53 @@
 import React, { useMemo, useState } from 'react';
 import {
-  AlertCircle,
   BarChart3,
   Bell,
-  Building2,
   Camera,
   ChevronDown,
-  FileText,
   Info,
   Menu,
   Search,
 } from 'lucide-react';
 
-const QUICK_ACTIONS = [
+const WEEKLY_UPLOAD_SUMMARY = [
   {
-    id: 'capture',
-    label: '거래명세서 촬영',
-    description: '카메라 플로우',
-    icon: Camera,
-    tone: 'bg-blue-50 border-blue-200 text-blue-700',
-    action: 'camera',
+    date: '2026-01-06',
+    total: 3,
+    counts: { analyzing: 1, completed: 1, failed: 1 },
   },
   {
-    id: 'invoice',
-    label: '거래명세서 관리',
-    description: 'OCR 결과 검수',
-    icon: FileText,
-    tone: 'bg-white border-gray-200 text-gray-700',
-    action: 'invoice',
+    date: '2026-01-05',
+    total: 4,
+    counts: { analyzing: 2, completed: 2, failed: 0 },
   },
   {
-    id: 'supplier',
-    label: '공급사 관리',
-    description: '공급사별 현황',
-    icon: Building2,
-    tone: 'bg-white border-gray-200 text-gray-700',
-    action: 'supplier',
+    date: '2026-01-04',
+    total: 2,
+    counts: { analyzing: 0, completed: 2, failed: 0 },
   },
   {
-    id: 'expiry',
-    label: '유효기간 점검',
-    description: '위험 품목 확인',
-    icon: AlertCircle,
-    tone: 'bg-white border-gray-200 text-gray-700',
-    action: 'expiry',
+    date: '2026-01-03',
+    total: 5,
+    counts: { analyzing: 1, completed: 3, failed: 1 },
+  },
+  {
+    date: '2026-01-02',
+    total: 1,
+    counts: { analyzing: 0, completed: 1, failed: 0 },
+  },
+  {
+    date: '2026-01-01',
+    total: 0,
+    counts: { analyzing: 0, completed: 0, failed: 0 },
+  },
+  {
+    date: '2025-12-31',
+    total: 2,
+    counts: { analyzing: 1, completed: 1, failed: 0 },
   },
 ];
 
-const RECENT_UPLOADS = [
+const SEARCH_ITEMS = [
   {
     id: 'INV-2026-003',
     supplierName: '비타민하우스',
@@ -124,6 +124,28 @@ const SEARCH_SCOPES = [
 
 const RECENT_SEARCHES = ['비타민하우스', 'INV-2026-002', '유효기간'];
 
+const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
+const STATUS_ORDER = ['analyzing', 'completed', 'failed'];
+const STATUS_LABELS = {
+  analyzing: 'AI분석중',
+  completed: '완료',
+  failed: '미처리',
+};
+const STATUS_TONE = {
+  analyzing: 'bg-blue-50 text-blue-600 border-blue-200',
+  completed: 'bg-green-50 text-green-600 border-green-200',
+  failed: 'bg-red-50 text-red-600 border-red-200',
+};
+
+const formatDateLabel = (value) => {
+  const date = new Date(`${value}T00:00:00`);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const dayLabel = DAY_LABELS[date.getDay()];
+  return `${year}.${month}.${day} (${dayLabel})`;
+};
+
 const getStatusBadge = (status) => {
   switch (status) {
     case 'completed':
@@ -150,7 +172,7 @@ const getStatusLabel = (status) => {
   }
 };
 
-export default function DashboardApp({ onMenuChange }) {
+export default function DashboardApp({ onMenuChange, onDateSelect }) {
   const [isCameraFlowOpen, setIsCameraFlowOpen] = useState(false);
   const [isNotiOpen, setIsNotiOpen] = useState(false);
   const [notiTab, setNotiTab] = useState('all');
@@ -159,6 +181,7 @@ export default function DashboardApp({ onMenuChange }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchScope, setSearchScope] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isWeeklyExpanded, setIsWeeklyExpanded] = useState(false);
 
   const openCameraFlow = () => {
     setIsCameraFlowOpen(true);
@@ -210,7 +233,7 @@ export default function DashboardApp({ onMenuChange }) {
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const normalizeValue = (value) => `${value ?? ''}`.toLowerCase();
   const searchResults = normalizedQuery
-    ? RECENT_UPLOADS.filter((item) => {
+    ? SEARCH_ITEMS.filter((item) => {
         if (searchScope === 'invoice') {
           return normalizeValue(item.id).includes(normalizedQuery);
         }
@@ -225,12 +248,34 @@ export default function DashboardApp({ onMenuChange }) {
       })
     : [];
 
-  const handleQuickAction = (action) => {
-    if (action === 'camera') {
-      openCameraFlow();
+  const weeklyTotal = useMemo(
+    () => WEEKLY_UPLOAD_SUMMARY.reduce((acc, item) => acc + item.total, 0),
+    []
+  );
+  const weeklyStatusTotals = useMemo(
+    () =>
+      WEEKLY_UPLOAD_SUMMARY.reduce(
+        (acc, item) => {
+          STATUS_ORDER.forEach((status) => {
+            acc[status] += item.counts?.[status] || 0;
+          });
+          return acc;
+        },
+        { analyzing: 0, completed: 0, failed: 0 }
+      ),
+    []
+  );
+  const weeklyVisibleItems = isWeeklyExpanded
+    ? WEEKLY_UPLOAD_SUMMARY
+    : WEEKLY_UPLOAD_SUMMARY.slice(0, 2);
+
+  const handleDateSelect = (item) => {
+    const dateLabel = formatDateLabel(item.date);
+    if (onDateSelect) {
+      onDateSelect({ date: item.date, label: dateLabel });
       return;
     }
-    onMenuChange?.(action);
+    onMenuChange?.('invoice');
   };
 
   return (
@@ -280,17 +325,86 @@ export default function DashboardApp({ onMenuChange }) {
         </div>
       </header>
 
-      <div className="bg-blue-50 border-b border-blue-100 px-4 py-2">
-        <div className="flex items-start gap-2 text-[11px] text-blue-800">
-          <Info className="mt-0.5 h-4 w-4 text-blue-500" />
-          <p className="leading-snug">
-            통계 카드는 후속 기획 후 탑재됩니다. 현재는 사용성 테스트를 위한 레이아웃
-            확인 단계입니다.
-          </p>
-        </div>
-      </div>
-
       <div className="flex-1 overflow-y-auto bg-gray-50 px-4 py-4 space-y-4">
+        {/* 최근 7일 업로드 */}
+        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-gray-900">최근 7일 업로드</p>
+              <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] text-gray-500">
+                <span className="font-semibold text-gray-700">총 {weeklyTotal}건</span>
+                {STATUS_ORDER.map((status) => (
+                  <span
+                    key={status}
+                    className={`rounded-full border px-2 py-0.5 font-semibold ${STATUS_TONE[status]}`}
+                  >
+                    {STATUS_LABELS[status]} {weeklyStatusTotals[status]}건
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              <button
+                type="button"
+                onClick={() => setIsWeeklyExpanded((prev) => !prev)}
+                aria-expanded={isWeeklyExpanded}
+                className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700"
+              >
+                {isWeeklyExpanded ? '접기' : '펼치기'}
+                <ChevronDown
+                  className={`h-3 w-3 transition-transform ${
+                    isWeeklyExpanded ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              <button
+                type="button"
+                onClick={() => onMenuChange?.('invoice')}
+                className="text-[10px] font-semibold text-gray-500 hover:text-gray-700"
+              >
+                거래명세서로 이동
+              </button>
+            </div>
+          </div>
+          <div className="divide-y divide-gray-100 transition-all duration-300">
+            {weeklyVisibleItems.map((item) => {
+              const dateLabel = formatDateLabel(item.date);
+              const counts = item.counts || {};
+              return (
+                <button
+                  key={item.date}
+                  type="button"
+                  onClick={() => handleDateSelect(item)}
+                  className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{dateLabel}</p>
+                      <p className="text-[11px] text-gray-400">총 {item.total}건 업로드</p>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-gray-300 -rotate-90" />
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {STATUS_ORDER.map((status) => (
+                      <span
+                        key={status}
+                        className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUS_TONE[status]}`}
+                      >
+                        {STATUS_LABELS[status]} {counts[status] || 0}건
+                      </span>
+                    ))}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          {!isWeeklyExpanded && (
+            <div className="border-t border-gray-100 px-4 py-2 text-[10px] text-gray-400">
+              {WEEKLY_UPLOAD_SUMMARY.length - weeklyVisibleItems.length}일치 더 보기
+            </div>
+          )}
+        </div>
+
         {/* 통계 카드 영역 (Placeholder) */}
         <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-4">
           <div className="flex items-start justify-between gap-3">
@@ -307,163 +421,6 @@ export default function DashboardApp({ onMenuChange }) {
             <div className="h-16 rounded-xl bg-gray-100"></div>
             <div className="h-16 rounded-xl bg-gray-100"></div>
             <div className="h-16 rounded-xl bg-gray-100"></div>
-          </div>
-        </div>
-
-        {/* 빠른 작업 */}
-        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-            <p className="text-sm font-bold text-gray-900">빠른 작업</p>
-            <p className="text-[10px] text-gray-400">자주 쓰는 기능</p>
-          </div>
-          <div className="p-4 grid grid-cols-2 gap-2">
-            {QUICK_ACTIONS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => handleQuickAction(item.action)}
-                  className={`rounded-2xl border p-3 text-left shadow-sm transition-colors hover:bg-gray-50 ${item.tone}`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/70 border border-white/60">
-                      <Icon className="h-5 w-5 text-gray-700" />
-                    </div>
-                    <ChevronDown className="h-4 w-4 text-gray-300 -rotate-90" />
-                  </div>
-                  <div className="mt-3">
-                    <p className="text-sm font-bold text-gray-900">{item.label}</p>
-                    <p className="text-[11px] text-gray-500">{item.description}</p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 최근 업로드 */}
-        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-            <p className="text-sm font-bold text-gray-900">최근 업로드</p>
-            <button
-              type="button"
-              onClick={() => onMenuChange?.('invoice')}
-              className="text-[11px] font-semibold text-blue-600 hover:text-blue-700"
-            >
-              거래명세서로 이동
-            </button>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {RECENT_UPLOADS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => onMenuChange?.('invoice')}
-                className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-gray-50 border border-gray-200 text-gray-600">
-                      <FileText className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${getStatusBadge(
-                            item.status
-                          )}`}
-                        >
-                          {getStatusLabel(item.status)}
-                        </span>
-                        <span className="text-[10px] text-gray-400">{item.timeLabel}</span>
-                      </div>
-                      <p className="mt-0.5 text-sm font-semibold text-gray-900">
-                        {item.supplierName}
-                      </p>
-                      <p className="text-[11px] text-gray-500">
-                        {item.id} · 품목 {item.itemCount}개
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] text-gray-400">상태</p>
-                    <p className="text-xs font-semibold text-gray-700">{item.note}</p>
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 알림 요약 */}
-        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-            <p className="text-sm font-bold text-gray-900">알림 요약</p>
-            <button
-              type="button"
-              onClick={toggleNotiPanel}
-              className="text-[11px] font-semibold text-blue-600 hover:text-blue-700"
-            >
-              전체 보기
-            </button>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {notifications.slice(0, 3).map((item) => {
-              const tone = NOTIFICATION_TONE[item.type] || NOTIFICATION_TONE.review;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => markNotificationRead(item.id)}
-                  className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl ${tone.badgeClass}`}
-                    >
-                      <span className={`h-2 w-2 rounded-full ${tone.dotClass}`}></span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-gray-900">{item.title}</p>
-                        {item.unread && (
-                          <span className="text-[10px] font-semibold text-blue-600">NEW</span>
-                        )}
-                      </div>
-                      <p className="text-[11px] text-gray-500">{item.description}</p>
-                    </div>
-                    <span className="text-[10px] text-gray-400">{item.time}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 가이드 */}
-        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-            <p className="text-sm font-bold text-gray-900">가이드</p>
-            <p className="text-[10px] text-gray-400">사용 흐름 예시</p>
-          </div>
-          <div className="p-4 space-y-3">
-            {[
-              { step: '1', title: '거래명세서 촬영', desc: '하단 카메라 버튼으로 촬영/업로드' },
-              { step: '2', title: 'OCR 결과 검수', desc: '거래명세서 관리에서 품목 수정/저장' },
-              { step: '3', title: '공급사별 현황 확인', desc: '공급사 관리에서 기간별 통계 확인' },
-              { step: '4', title: '유효기간 위험 품목 조치', desc: '유효기간 점검에서 체크 처리' },
-            ].map((item) => (
-              <div key={item.step} className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-blue-50 text-blue-700 text-[11px] font-bold">
-                  {item.step}
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-900">{item.title}</p>
-                  <p className="text-[11px] text-gray-500">{item.desc}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
 
