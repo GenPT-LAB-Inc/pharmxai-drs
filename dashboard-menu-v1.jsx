@@ -758,11 +758,11 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
       </header>
 
       <div className="flex-1 overflow-y-auto bg-gray-50 px-4 py-4 space-y-4">
-        {/* 최근 7일 업로드 */}
+        {/* 최근 업로드 */}
         <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <div>
-              <p className="text-sm font-bold text-gray-900">최근 7일 업로드</p>
+              <p className="text-sm font-bold text-gray-900">최근 업로드</p>
               <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] text-gray-500">
                 <span className="font-semibold text-gray-700">총 {weeklyTotal}건</span>
                 {STATUS_ORDER.map((status) => (
@@ -823,21 +823,14 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
               );
             })}
           </div>
-          {!isWeeklyExpanded && (
-            <div className="border-t border-gray-100 px-4 py-2 text-[10px] text-gray-400">
-              {WEEKLY_UPLOAD_SUMMARY.length - weeklyVisibleItems.length}일치 더 보기
-            </div>
-          )}
         </div>
 
-        {/* 6개월 매입현황: 매입액 */}
+        {/* 월간 매입현황: 매입액 */}
         <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-bold text-gray-900">6개월 매입현황 · 매입액</p>
-              <p className="text-[10px] text-gray-400">
-                {currentMonthRangeLabel} (전년동기 {previousMonthRangeLabel})
-              </p>
+              <p className="text-sm font-bold text-gray-900">월간 매입현황 · 매입액</p>
+              <p className="text-[10px] text-gray-400">{currentMonthRangeLabel}</p>
             </div>
             <div className="flex flex-wrap justify-end gap-2">
               <StatToggle
@@ -855,7 +848,7 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
           <div className="px-4 py-3">
             <div className="grid grid-cols-2 gap-2 mb-3">
               <div className="rounded-xl border border-gray-200 bg-gray-50 p-2">
-                <p className="text-[10px] font-semibold text-gray-500">6개월 누적</p>
+                <p className="text-[10px] font-semibold text-gray-500">기간 누적</p>
                 <p className="text-sm font-bold text-gray-900">{formatKrwCompact(amountTotal)}</p>
                 <p className="text-[10px] text-gray-400">
                   월 평균 {formatKrwCompact(Math.round(amountTotal / amountCurrent.length))}
@@ -923,14 +916,12 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
           </div>
         </div>
 
-        {/* 6개월 매입현황: 품목 건수 & 수량 */}
+        {/* 월간 매입현황: 품목 건수 & 수량 */}
         <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-bold text-gray-900">6개월 매입현황 · 품목/수량</p>
-              <p className="text-[10px] text-gray-400">
-                {currentMonthRangeLabel} (전년동기 {previousMonthRangeLabel})
-              </p>
+              <p className="text-sm font-bold text-gray-900">월간 매입현황 · 품목/수량</p>
+              <p className="text-[10px] text-gray-400">{currentMonthRangeLabel}</p>
             </div>
             <div className="flex flex-wrap justify-end gap-2">
               <StatToggle
@@ -955,7 +946,7 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
                 </p>
               </div>
               <div className="rounded-xl border border-gray-200 bg-gray-50 p-2">
-                <p className="text-[10px] font-semibold text-gray-500">6개월 누적 수량</p>
+                <p className="text-[10px] font-semibold text-gray-500">기간 누적 수량</p>
                 <p className="text-sm font-bold text-gray-900">{formatNumber(quantityTotal)}개</p>
                 <p
                   className={`text-[10px] font-semibold ${
@@ -1053,7 +1044,7 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
           <div className="px-4 py-3 flex items-start gap-4">
             <DonutChart
               segments={supplierShareSegments}
-              centerTopLabel="6개월"
+              centerTopLabel="기간 합계"
               centerValueLabel={formatKrwCompact(supplierShareTotal)}
             />
             <div className="flex-1 space-y-2">
@@ -1088,7 +1079,7 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
           <div className="px-4 py-3 flex items-start gap-4">
             <DonutChart
               segments={productShareSegments}
-              centerTopLabel="6개월"
+              centerTopLabel="기간 합계"
               centerValueLabel={formatKrwCompact(productShareTotal)}
             />
             <div className="flex-1 space-y-2">
@@ -1262,6 +1253,7 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
                 '거래명세서 관리',
                 '공급사 관리',
                 '유효기간 점검',
+                'AI분석 보고서',
                 '설정',
                 '로그아웃',
               ].map((label) => (
@@ -1271,6 +1263,8 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
                   onClick={() => {
                     if (label === '거래명세서 관리' && onMenuChange) {
                       onMenuChange('invoice');
+                    } else if (label === 'AI분석 보고서' && onMenuChange) {
+                      onMenuChange('report');
                     } else if (label === '공급사 관리' && onMenuChange) {
                       onMenuChange('supplier');
                     } else if (label === '유효기간 점검' && onMenuChange) {

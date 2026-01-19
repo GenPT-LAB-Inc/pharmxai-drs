@@ -753,6 +753,7 @@ export default function ExpiryCheckApp({ onMenuChange }) {
                 '거래명세서 관리',
                 '공급사 관리',
                 '유효기간 점검',
+                'AI분석 보고서',
                 '설정',
                 '로그아웃',
               ].map((label) => (
@@ -766,6 +767,8 @@ export default function ExpiryCheckApp({ onMenuChange }) {
                       onMenuChange('invoice');
                     } else if (label === '공급사 관리' && onMenuChange) {
                       onMenuChange('supplier');
+                    } else if (label === 'AI분석 보고서' && onMenuChange) {
+                      onMenuChange('report');
                     } else {
                       closeMenuPanel();
                     }

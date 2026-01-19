@@ -872,7 +872,7 @@ export default function SupplierManagementApp({ onMenuChange }) {
               className="w-48 rounded-2xl border border-gray-200 bg-white p-2 shadow-xl animate-fade-in"
               onClick={(e) => e.stopPropagation()}
             >
-              {['대시보드', '거래명세서 관리', '공급사 관리', '유효기간 점검', '설정', '로그아웃'].map((label) => (
+              {['대시보드', '거래명세서 관리', '공급사 관리', '유효기간 점검', 'AI분석 보고서', '설정', '로그아웃'].map((label) => (
                 <button
                   key={label}
                   type="button"
@@ -883,6 +883,8 @@ export default function SupplierManagementApp({ onMenuChange }) {
                       onMenuChange('invoice');
                     } else if (label === '유효기간 점검' && onMenuChange) {
                       onMenuChange('expiry');
+                    } else if (label === 'AI분석 보고서' && onMenuChange) {
+                      onMenuChange('report');
                     } else if (label === '공급사 관리') {
                       closeMenuPanel();
                     } else {
