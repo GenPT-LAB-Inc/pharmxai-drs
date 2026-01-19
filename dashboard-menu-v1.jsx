@@ -492,18 +492,21 @@ function DonutChart({ segments, centerTopLabel, centerValueLabel }) {
   const total = segments.reduce((acc, item) => acc + item.value, 0) || 1;
   const radius = 16;
   const circumference = 2 * Math.PI * radius;
+  const arcOverlap = segments.length > 1 ? 0.8 : 0;
 
   const arcs = [];
   let offset = 0;
-  segments.forEach((segment) => {
+  segments.forEach((segment, index) => {
     const fraction = segment.value / total;
-    const dash = fraction * circumference;
+    const rawDash =
+      index === segments.length - 1 ? circumference - offset : fraction * circumference;
+    const dash = Math.min(rawDash + arcOverlap, circumference);
     arcs.push({
       ...segment,
-      dashArray: `${dash} ${circumference - dash}`,
-      dashOffset: -offset,
+      dashArray: `${dash} ${Math.max(circumference - dash, 0)}`,
+      dashOffset: -(offset + arcOverlap / 2),
     });
-    offset += dash;
+    offset += rawDash;
   });
 
   return (
@@ -639,7 +642,7 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
   );
   const weeklyVisibleItems = isWeeklyExpanded
     ? WEEKLY_UPLOAD_SUMMARY
-    : WEEKLY_UPLOAD_SUMMARY.slice(0, 2);
+    : WEEKLY_UPLOAD_SUMMARY.slice(0, 1);
 
   const currentMonthRangeLabel = formatMonthRangeLabel(REPORT_MONTH_KEYS);
   const previousMonthRangeLabel = formatMonthRangeLabel(YOY_MONTH_KEYS);
@@ -785,13 +788,6 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
                     isWeeklyExpanded ? 'rotate-180' : ''
                   }`}
                 />
-              </button>
-              <button
-                type="button"
-                onClick={() => onMenuChange?.('invoice')}
-                className="text-[10px] font-semibold text-gray-500 hover:text-gray-700"
-              >
-                거래명세서로 이동
               </button>
             </div>
           </div>
