@@ -211,8 +211,8 @@ const EXPIRY_ITEMS = [
 
 const EXPIRY_GROUPS = [
   { id: 'risk', title: '유효기간 위험', range: '6개월 미만' },
-  { id: 'caution', title: '유효기간 주의', range: '6개월 이상 ~ 12개월 미만' },
-  { id: 'normal', title: '유효기간 보통', range: '12개월 이상 ~ 24개월 미만' },
+  { id: 'caution', title: '유효기간 주의', range: '6 ~ 12개월 미만' },
+  { id: 'normal', title: '유효기간 보통', range: '12 ~ 24개월 미만' },
   { id: 'safe', title: '유효기간 안전', range: '24개월 이상' },
 ];
 
