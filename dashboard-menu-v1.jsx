@@ -1113,7 +1113,7 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
                     className={`rounded-lg border px-2 py-1.5 ${tone.card}`}
                   >
                     <div className="flex items-center justify-between">
-                      <p className={`text-[10px] font-semibold ${tone.text}`}>
+                      <p className={`text-[14px] font-semibold ${tone.text}`}>
                         {group.title}
                       </p>
                       <p className="text-sm font-bold text-gray-900">
@@ -1131,7 +1131,7 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
 
             <div className="pt-1.5 border-t border-gray-100">
               <div className="flex items-center justify-between">
-                <p className="text-[11px] font-semibold text-gray-700">위험/주의 신규 진입</p>
+                <p className="text-[11px] font-semibold text-gray-700">위험/주의 신규 발생</p>
                 <span className="text-[10px] text-gray-400">
                   지난 7일 기준
                 </span>
@@ -1143,8 +1143,8 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
                   className="flex items-center justify-between gap-2 rounded-lg border border-red-100 bg-red-50 px-2 py-1.5 text-left"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-semibold text-red-700">
-                      위험 신규 진입
+                    <span className="text-[12px] font-semibold text-red-700">
+                      위험
                     </span>
                     <span className="rounded-full border border-red-200 bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700">
                       {formatNumber(expirySnapshot.newRiskEntries.length)}건
@@ -1162,8 +1162,8 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
                   className="flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-2 py-1.5 text-left"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-semibold text-amber-700">
-                      주의 신규 진입
+                    <span className="text-[12px] font-semibold text-amber-700">
+                      주의
                     </span>
                     <span className="rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
                       {formatNumber(expirySnapshot.newCautionEntries.length)}건
