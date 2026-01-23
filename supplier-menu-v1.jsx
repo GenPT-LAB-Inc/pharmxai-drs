@@ -32,6 +32,7 @@ const MAX_ZOOM_SCALE = 4;
 const SUPPLIERS = [
   { id: 'all', name: '전체 공급사' },
   { id: 'vitaminhouse', name: '비타민하우스' },
+  { id: 'motherspharm', name: '(주)마더스팜' },
   { id: 'gc', name: '(주)녹십자' },
   { id: 'yuhan', name: '(주)유한양행' },
   { id: 'chong', name: '종근당' }
@@ -44,9 +45,9 @@ const INVOICE_SUMMARIES = [
     supplierId: 'vitaminhouse',
     supplierName: '비타민하우스',
     date: '2026-01-06',
-    itemCount: 3,        // 품목 종류 수
+    itemCount: 5,        // 품목 종류 수
     totalQty: 15,        // 총 수량
-    totalAmount: 297500,
+    totalAmount: 278250,
     status: 'completed',
     taxType: 'separate'
   },
@@ -63,12 +64,12 @@ const INVOICE_SUMMARIES = [
   },
   {
     id: 'INV-2026-002',
-    supplierId: 'gc',
-    supplierName: '(주)녹십자',
+    supplierId: 'motherspharm',
+    supplierName: '(주)마더스팜',
     date: '2026-01-06',
-    itemCount: 3,
-    totalQty: 170,
-    totalAmount: 313500,
+    itemCount: 2,
+    totalQty: 56,
+    totalAmount: 119000,
     status: 'analyzing',
     taxType: 'none'
   },
@@ -137,7 +138,7 @@ const INVOICE_C_ID = 'INV-2026-008';
 const INVOICE_META = {
   [INVOICE_A_ID]: { 
     hasSeparateTax: true, 
-    taxAmount: 27045,
+    taxAmount: 27825,
     status: 'completed',
     failureReason: ''
   },
@@ -145,7 +146,11 @@ const INVOICE_META = {
     hasSeparateTax: false, 
     taxAmount: 0,
     status: 'analyzing',
-    failureReason: ''
+    failureReason: '',
+    supplierRegNo: '204-81-77115',
+    supplierName: '(주)마더스팜',
+    supplierOwner: '김현민',
+    supplierAddress: '서울 동작구 보라매로5길 51, 롯데타워 6층 607호'
   },
   'default': { 
     hasSeparateTax: true, 
@@ -162,7 +167,7 @@ const INVOICE_IMAGE_DATA = {
     pageLabel: 'Page 1/2'
   },
   [INVOICE_B_ID]: {
-    src: '/invoices/invoice-b.jpg',
+    src: '/invoices/invoice-b.png',
     fileName: 'invoice-b.svg',
     pageLabel: 'Page 2/2'
   }
@@ -174,27 +179,27 @@ const INITIAL_DETAIL_ITEMS = [
     invoiceId: INVOICE_A_ID, 
     invoiceName: '비타민하우스 | 2026-001', 
     status: 'completed',
-    name: '단쇄지방산 SCFA455', 
-    standard: '1,200mgX90정', 
+    name: '백년백세효모골드', 
+    standard: '200mg x 180정', 
     qty: 5, 
-    price: 28000, 
-    lot: 'A203947', 
-    expiry: '2027-03-12', 
-    note: '', 
-    isLotMissing: true
+    price: 14000, 
+    lot: 'A260101', 
+    expiry: '2027-12-31', 
+    note: '정상', 
+    isLotMissing: false
   },
   {
     id: 2, 
     invoiceId: INVOICE_A_ID, 
     invoiceName: '비타민하우스 | 2026-001', 
     status: 'completed',
-    name: '미라클 프로젝트 NMN250', 
-    standard: '1,000mgX30정', 
-    qty: 5, 
-    price: 21000, 
-    lot: 'A203948', 
-    expiry: '2028-05-06', 
-    note: '', 
+    name: '블랙 비오틴 5000', 
+    standard: '1,000mg x 60정', 
+    qty: 2, 
+    price: 10500, 
+    lot: 'A260102', 
+    expiry: '2027-10-15', 
+    note: '신규입고', 
     isLotMissing: false
   },
   {
@@ -202,27 +207,55 @@ const INITIAL_DETAIL_ITEMS = [
     invoiceId: INVOICE_A_ID, 
     invoiceName: '비타민하우스 | 2026-001', 
     status: 'completed',
-    name: '위UP로 가는 SOD효소', 
-    standard: '2gX30포(60g)', 
+    name: '알부민비타콤', 
+    standard: '20g X 6포 X 5EA', 
     qty: 5, 
-    price: 10500, 
-    lot: 'B102938', 
-    expiry: '2027-11-20', 
-    note: '', 
+    price: 31500, 
+    lot: 'A260103', 
+    expiry: '2028-03-20', 
+    note: '상온보관', 
     isLotMissing: false
   },
   {
-    id: 4, 
+    id: 4,
+    invoiceId: INVOICE_A_ID, 
+    invoiceName: '비타민하우스 | 2026-001', 
+    status: 'completed',
+    name: '완전단백 아미노100', 
+    standard: '7g X 30포', 
+    qty: 2, 
+    price: 10500, 
+    lot: 'A260104', 
+    expiry: '2028-01-05', 
+    note: '행사', 
+    isLotMissing: false
+  },
+  {
+    id: 5,
+    invoiceId: INVOICE_A_ID, 
+    invoiceName: '비타민하우스 | 2026-001', 
+    status: 'completed',
+    name: '쾌요박씨', 
+    standard: '500mg X 60캡슐', 
+    qty: 1, 
+    price: 8750, 
+    lot: 'A260105', 
+    expiry: '2027-08-30', 
+    note: '소량', 
+    isLotMissing: false
+  },
+  {
+    id: 6, 
     invoiceId: INVOICE_B_ID, 
-    invoiceName: '(주)녹십자 | 2026-002', 
+    invoiceName: '(주)마더스팜 | 2026-002', 
     status: 'analyzing',
-    name: '탁센 연질캡슐', 
-    standard: '10C', 
-    qty: 50, 
-    price: 2750, 
-    lot: 'C998877', 
-    expiry: '2026-12-31', 
-    note: '매대진열', 
+    name: '덴타케어포르테', 
+    standard: '60정', 
+    qty: 6, 
+    price: 11500, 
+    lot: 'M260201', 
+    expiry: '2027-06-30', 
+    note: '신규입고', 
     isLotMissing: false
   },
   {
@@ -254,31 +287,17 @@ const INITIAL_DETAIL_ITEMS = [
     isLotMissing: false
   },
   {
-    id: 5, 
+    id: 9, 
     invoiceId: INVOICE_B_ID, 
-    invoiceName: '(주)녹십자 | 2026-002', 
+    invoiceName: '(주)마더스팜 | 2026-002', 
     status: 'analyzing',
-    name: '비맥스 메타정', 
-    standard: '100T', 
-    qty: 20, 
-    price: 49500, 
-    lot: 'D112233', 
-    expiry: '2028-01-15', 
-    note: '', 
-    isLotMissing: false
-  },
-  {
-    id: 6, 
-    invoiceId: INVOICE_B_ID, 
-    invoiceName: '(주)녹십자 | 2026-002', 
-    status: 'analyzing',
-    name: '제놀 쿨 파스', 
-    standard: '5매입', 
-    qty: 100, 
-    price: 880, 
-    lot: 'E554433', 
-    expiry: '2027-06-01', 
-    note: '반품불가', 
+    name: '엔디펜알파정', 
+    standard: '10정', 
+    qty: 50, 
+    price: 1000, 
+    lot: 'M260202', 
+    expiry: '2028-02-28', 
+    note: '정상', 
     isLotMissing: false
   }
 ];
@@ -296,7 +315,7 @@ const INITIAL_NOTIFICATIONS = [
     id: 2,
     type: 'ocr',
     title: 'OCR 완료',
-    description: '(주)녹십자 | 2026-002 · 3건',
+    description: '(주)마더스팜 | 2026-002 · 2건',
     time: '5분 전',
     unread: true
   },
@@ -334,7 +353,7 @@ const SEARCH_SCOPES = [
   { id: 'product', label: '상품명' },
 ];
 
-const RECENT_SEARCHES = ['비타민하우스', '2026-001', '탁센'];
+const RECENT_SEARCHES = ['비타민하우스', '2026-001', '덴타케어포르테'];
 
 // --- Helper Functions ---
 const formatCurrency = (val) => new Intl.NumberFormat('ko-KR').format(Math.round(val));
