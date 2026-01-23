@@ -35,13 +35,13 @@ const INVOICE_IMAGE_DATA = {
     pageLabel: 'Page 1/2',
   },
   [INVOICE_B_ID]: {
-    src: '/invoices/invoice-b.jpg',
-    fileName: 'invoice-b.jpg',
+    src: '/invoices/invoice-b.png',
+    fileName: 'invoice-b.png',
     pageLabel: 'Page 2/2',
   },
   [INVOICE_C_ID]: {
-    src: '/invoices/invoice-a.png',
-    fileName: 'invoice-a.png',
+    src: '/invoices/invoice-c.png',
+    fileName: 'invoice-c.png',
     pageLabel: 'Page 2/2',
   },
 };
@@ -739,7 +739,7 @@ export default function ExpiryCheckApp({ onMenuChange }) {
                           <span
                             className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${tone.badge}`}
                           >
-                            신규 +{newEntryCount}
+                             +{newEntryCount}
                           </span>
                         )}
                       </div>
@@ -1081,7 +1081,7 @@ function ExpiryGroupSection({
                   <span
                     className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${tone.badge}`}
                   >
-                    신규 +{newEntryCount}
+                   +{newEntryCount}
                   </span>
                 )}
               </div>
@@ -1174,7 +1174,7 @@ function ExpiryItemCard({ item, tone, onViewInvoice, onToggleCheck, showNewBadge
               className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-600 hover:bg-blue-100"
             >
               <Eye className="h-3 w-3" />
-              이미지
+              거래명세서 보기
             </button>
             {!isExpired && (
               <button

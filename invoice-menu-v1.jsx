@@ -55,13 +55,13 @@ const INVOICE_IMAGE_DATA = {
     pageLabel: 'Page 1/2'
   },
   [INVOICE_B_ID]: {
-    src: '/invoices/invoice-b.jpg',
+    src: '/invoices/invoice-b.png',
     fileName: 'invoice-b.jpg',
     pageLabel: 'Page 2/2'
   },
   [INVOICE_C_ID]: {
-    src: '/invoices/invoice-b.jpg',
-    fileName: 'invoice-b.jpg',
+    src: '/invoices/invoice-c.png',
+    fileName: 'invoice-c.png',
     pageLabel: 'Page 1/1'
   }
 };
@@ -1364,7 +1364,7 @@ function InvoiceSection({
                 isImageVisible ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-gray-50 border-gray-200 text-gray-400'
               } ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {isImageVisible ? <><Eye className="w-3 h-3" /> 거래명세서 보기 ON</> : <><EyeOff className="w-3 h-3" /> 거래명세서 보기 OFF</>}
+              {isImageVisible ? <><Eye className="w-3 h-3" /> 거래명세서 보기</> : <><EyeOff className="w-3 h-3" /> 거래명세서 보기</>}
             </button>
           </div>
 
