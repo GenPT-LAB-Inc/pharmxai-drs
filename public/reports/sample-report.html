@@ -22,6 +22,10 @@
             -webkit-print-color-adjust: exact; /* Force print colors */
             print-color-adjust: exact;
         }
+        .ko-keepall {
+            word-break: keep-all;
+            overflow-wrap: anywhere;
+        }
         .card-shadow {
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
             border: 1px solid #E5E7EB; /* Border for print definition */
@@ -36,6 +40,9 @@
             .card-shadow { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
             .no-print { display: none; }
             .page-break { page-break-before: always; }
+            /* Ensure all tab panels are visible when printing */
+            .mobile-tablist { display: none !important; }
+            [data-tab-panel][hidden] { display: block !important; }
         }
         
         .badge-risk { background-color: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; font-weight: 700; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; }
@@ -43,6 +50,57 @@
         
         .progress-bar-bg { background-color: #F3F4F6; height: 6px; border-radius: 9999px; width: 100%; overflow: hidden; }
         .progress-bar-fill { height: 100%; border-radius: 9999px; }
+
+        /* Mobile Tabs (Report) */
+        .mobile-tablist {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.25rem;
+            background: #F3F4F6; /* gray-100 */
+            border: 1px solid #E5E7EB; /* gray-200 */
+            border-radius: 0.875rem;
+        }
+        .mobile-tablist .tab-btn {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #6B7280; /* gray-500 */
+            transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .mobile-tablist .tab-btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+        .mobile-tablist .tab-btn[aria-selected="true"] {
+            background: #FFFFFF;
+            color: #111827; /* gray-900 */
+            border-color: #E5E7EB; /* gray-200 */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        }
+        .mobile-tablist .tab-btn-etc[aria-selected="true"] {
+            background: #EFF6FF; /* blue-50 */
+            border-color: #BFDBFE; /* blue-200 */
+            color: #1D4ED8; /* blue-700 */
+        }
+        .mobile-tablist .tab-btn-otc[aria-selected="true"] {
+            background: #ECFDF5; /* emerald-50 */
+            border-color: #A7F3D0; /* emerald-200 */
+            color: #047857; /* emerald-700 */
+        }
+        .mobile-tablist .tab-btn-health[aria-selected="true"] {
+            background: #FFFBEB; /* amber-50 */
+            border-color: #FDE68A; /* amber-200 */
+            color: #B45309; /* amber-700 */
+        }
 
         /* Network Map Styles (Professional) */
         .network-line {
@@ -67,6 +125,41 @@
             z-index: 20;
         }
 
+        /* Peer Universe Map (Responsive) */
+        .peer-universe-map {
+            --map-size: 300px;
+            width: var(--map-size);
+            height: var(--map-size);
+        }
+        .peer-universe-map .peer-universe-line {
+            width: calc(var(--map-size) * 0.4333);
+        }
+        .peer-universe-map .network-node {
+            width: clamp(40px, calc(var(--map-size) * 0.16), 48px);
+            height: clamp(40px, calc(var(--map-size) * 0.16), 48px);
+        }
+        .peer-universe-map .network-center {
+            width: clamp(52px, calc(var(--map-size) * 0.22), 64px);
+            height: clamp(52px, calc(var(--map-size) * 0.22), 64px);
+        }
+        .peer-universe-label {
+            display: block;
+            width: 5.5rem;
+            text-align: center;
+            font-size: 10px;
+            line-height: 1.1;
+            color: #cbd5e1; /* slate-300 */
+            font-weight: 700;
+            word-break: keep-all;
+            overflow-wrap: normal;
+        }
+
+        /* Purchase Mix (Responsive Doughnut) */
+        .purchase-mix-chart {
+            width: 168px;
+            height: 168px;
+        }
+
         /* Algorithm Viz Styles */
         .algo-tag {
             font-family: 'Fira Code', monospace;
@@ -83,7 +176,7 @@
         }
 
         /* Mobile screen adjustments */
-        @media screen and (max-width: 640px) {
+        @media screen and (max-width: 639px) {
             header.gradient-header {
                 padding: 1.25rem;
             }
@@ -119,6 +212,12 @@
                 grid-template-columns: 1fr;
             }
             main .grid.grid-cols-5 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            main .peer-universe-cards {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            main .kpi-row {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
@@ -171,9 +270,25 @@
             .w-1/2 {
                 width: 100%;
             }
-            .w-\[300px\].h-\[300px\] {
-                width: 220px;
-                height: 220px;
+            .peer-universe-map {
+                --map-size: clamp(220px, 60vw, 300px);
+            }
+            .peer-universe-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+            .peer-universe-header .peer-universe-icon {
+                width: 100%;
+                text-align: right;
+            }
+            .peer-universe-map-wrap {
+                padding-inline: 1rem;
+                overflow-x: hidden;
+            }
+            .purchase-mix-chart {
+                width: clamp(128px, 44vw, 160px);
+                height: clamp(128px, 44vw, 160px);
             }
 
             .bg-gradient-to-r {
@@ -181,11 +296,6 @@
                 align-items: flex-start;
                 gap: 0.5rem;
                 text-align: left;
-            }
-            .items-end {
-                align-items: flex-start;
-                flex-direction: column;
-                gap: 0.5rem;
             }
 
             .algo-tag {
@@ -214,110 +324,177 @@
                     <i class="fa-solid fa-capsules text-blue-300 text-2xl"></i>
                     <h1 class="font-bold text-xl tracking-wide">PharmxAI <span class="font-normal text-sm opacity-80">Monthly Insight</span></h1>
                 </div>
-                <div class="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full border border-white border-opacity-30">
-                    행복한약국 (PharmID: 2601-001)
-                </div>
             </div>
             <div>
                 <p class="text-blue-200 text-sm font-medium mb-1">2026년 1월호</p>
                 <h2 class="text-3xl font-bold leading-tight">월간 매입 분석 보고서</h2>
                 <div class="mt-4 flex items-center space-x-4 text-sm text-gray-300">
                     <span><i class="fa-solid fa-calendar mr-1"></i> 분석기간: 26.01.01 ~ 26.01.31</span>
-                    <span><i class="fa-solid fa-file-invoice mr-1"></i> 거래명세서: 48건</span>
                 </div>
             </div>
         </header>
 
         <main class="p-6 space-y-6">
             
-            <!-- 1. Executive Summary -->
-            <section class="grid grid-cols-3 gap-4">
-                <div class="col-span-1 bg-blue-50 rounded-xl p-4 border border-blue-100">
-                    <p class="text-xs text-blue-600 font-bold uppercase mb-1">Total Purchase</p>
-                    <p class="text-2xl font-bold text-gray-900">₩42,560,000</p>
-                    <p class="text-xs text-blue-500 mt-1"><i class="fa-solid fa-arrow-trend-up"></i> 전월 대비 +5.2%</p>
+            <!-- 1. Monthly Purchase Snapshot -->
+            <section class="card-shadow rounded-xl p-5 bg-white">
+                <div class="flex items-center space-x-2 mb-4 pb-2 border-b border-gray-100">
+                    <i class="fa-solid fa-chart-line text-blue-600"></i>
+                    <h3 class="font-bold text-gray-800">월간 매입 스냅샷</h3>
+                    <span class="text-xs text-gray-400">최근 1개월 입력된 거래명세서(OCR) 기준</span>
                 </div>
-                <div class="col-span-1 bg-gray-50 rounded-xl p-4 border border-gray-200">
-                    <p class="text-xs text-gray-500 font-bold uppercase mb-1">Active Suppliers</p>
-                    <p class="text-2xl font-bold text-gray-900">12개처</p>
-                    <p class="text-xs text-gray-500 mt-1">주거래: 감마약품 (42%)</p>
+
+                <!-- KPI Row -->
+                <div class="kpi-row grid grid-cols-2 gap-4">
+                    <div class="bg-blue-50 rounded-xl p-4 border border-blue-100 col-span-2">
+                        <p class="text-xs text-blue-600 font-bold uppercase mb-1">Total Purchase</p>
+                        <p class="text-2xl font-bold text-gray-900">₩42,560,000</p>
+                        <p class="text-xs text-blue-500 mt-1"><i class="fa-solid fa-arrow-trend-up"></i> 전월 대비 +5.2%</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                        <p class="text-xs text-gray-500 font-bold uppercase mb-1">Invoices</p>
+                        <p class="text-2xl font-bold text-gray-900">48건</p>
+                        <p class="text-xs text-gray-500 mt-1">공급사 12개처로부터 매입</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                        <p class="text-xs text-gray-500 font-bold uppercase mb-1">SKUs</p>
+                        <p class="text-2xl font-bold text-gray-900">312개</p>
+                        <p class="text-xs text-gray-500 mt-1">신규 매입 37개 품목</p>
+                    </div>
                 </div>
-                <div class="col-span-1 bg-red-50 rounded-xl p-4 border border-red-100">
-                    <p class="text-xs text-red-600 font-bold uppercase mb-1">Risk Alert</p>
-                    <p class="text-2xl font-bold text-red-600">8건</p>
-                    <p class="text-xs text-red-500 mt-1">반품권고 3건 / 주의 5건</p>
+
+                <!-- Mix + Top Items -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div class="bg-white border border-gray-200 rounded-xl p-4">
+                        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between mb-3">
+                            <h4 class="text-sm font-bold text-gray-800">카테고리 믹스</h4>
+                            <div class="flex flex-wrap items-center justify-end gap-2 w-full md:w-auto">
+                                <span id="purchaseMixBasisText" class="text-xs text-gray-500 font-bold whitespace-nowrap">금액 기준</span>
+                                <div class="flex items-center bg-gray-100 border border-gray-200 rounded-lg p-0.5 max-w-full" data-purchase-mix-toggle role="group" aria-label="카테고리 믹스 기준 선택">
+                                    <button type="button" class="px-2.5 py-1 text-xs font-bold rounded-md transition-colors bg-white text-gray-900 shadow-sm border border-gray-200" data-basis="amount" aria-pressed="true">금액</button>
+                                    <button type="button" class="px-2.5 py-1 text-xs font-bold rounded-md transition-colors text-gray-500 border border-transparent" data-basis="quantity" aria-pressed="false">수량</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-4 md:flex-row md:items-start">
+                            <div class="purchase-mix-chart relative flex-shrink-0 mx-auto md:mx-0">
+                                <canvas id="purchaseMixChart" role="img" aria-label="카테고리 믹스 원그래프"></canvas>
+                            </div>
+                            <div class="flex-1 w-full">
+                                <div id="purchaseMixBreakdown" class="w-full rounded-xl border border-gray-200 bg-white overflow-hidden divide-y divide-gray-100 text-sm md:text-xs"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-gray-200 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-sm font-bold text-gray-800">Top 매입 품목</h4>
+                            <span class="text-xs text-gray-500">금액 기준</span>
+                        </div>
+                        <table class="w-full text-xs text-left">
+                            <thead class="text-[10px] text-gray-500 bg-gray-50 uppercase">
+                                <tr>
+                                    <th class="px-2 py-2">품목</th>
+                                    <th class="px-2 py-2 text-right">매입액</th>
+                                    <th class="px-2 py-2 text-right">점유율</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr>
+                                    <td class="px-2 py-2">
+                                        <div class="font-bold text-gray-800">리피토정 20mg (300정)</div>
+                                        <div class="text-[10px] text-gray-500">감마약품</div>
+                                    </td>
+                                    <td class="px-2 py-2 text-right font-bold text-gray-800">₩3,260,000</td>
+                                    <td class="px-2 py-2 text-right text-gray-500">7.7%</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-2 py-2">
+                                        <div class="font-bold text-gray-800">타이레놀ER 650mg</div>
+                                        <div class="text-[10px] text-gray-500">알파약품</div>
+                                    </td>
+                                    <td class="px-2 py-2 text-right font-bold text-gray-800">₩2,140,000</td>
+                                    <td class="px-2 py-2 text-right text-gray-500">5.0%</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-2 py-2">
+                                        <div class="font-bold text-gray-800">임팩타민프리미엄</div>
+                                        <div class="text-[10px] text-gray-500">델타팜</div>
+                                    </td>
+                                    <td class="px-2 py-2 text-right font-bold text-gray-800">₩1,980,000</td>
+                                    <td class="px-2 py-2 text-right text-gray-500">4.7%</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-2 py-2">
+                                        <div class="font-bold text-gray-800">이가탄F캡슐</div>
+                                        <div class="text-[10px] text-gray-500">감마약품</div>
+                                    </td>
+                                    <td class="px-2 py-2 text-right font-bold text-gray-800">₩1,760,000</td>
+                                    <td class="px-2 py-2 text-right text-gray-500">4.1%</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-2 py-2">
+                                        <div class="font-bold text-gray-800">종근당 락토핏 골드</div>
+                                        <div class="text-[10px] text-gray-500">오메가팜</div>
+                                    </td>
+                                    <td class="px-2 py-2 text-right font-bold text-gray-800">₩1,420,000</td>
+                                    <td class="px-2 py-2 text-right text-gray-500">3.3%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="mt-2 text-[10px] text-gray-400 leading-relaxed">
+                            ※ 매입액/점유율은 거래명세서(OCR) 기반이며 반품/할인은 반영되지 않을 수 있습니다.
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- 2. Risk Management (Static List) -->
+            <!-- 2. Incoming Expiry Check (Purchase-based) -->
             <section class="card-shadow rounded-xl p-5 bg-white">
-                <div class="flex items-center space-x-2 mb-4 pb-2 border-b border-gray-100">
-                    <i class="fa-solid fa-triangle-exclamation text-red-500"></i>
-                    <h3 class="font-bold text-gray-800">리스크 알림 (반품 및 재고관리)</h3>
+                <div class="flex flex-col items-start gap-2 sm:flex-row sm:justify-between sm:items-end mb-2 pb-2 border-b border-gray-100">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-hourglass-half text-rose-600"></i>
+                        <h3 class="font-bold text-gray-800 text-left">이번 달 입고 유효기간 점검 (매입 기반)</h3>
+                    </div>
+                    <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded self-end sm:self-auto">기준일: 26.01.31</span>
                 </div>
-                
-                <table class="w-full text-sm text-left">
-                    <thead class="text-xs text-gray-500 bg-gray-50 uppercase">
-                        <tr>
-                            <th class="px-3 py-2">상태</th>
-                            <th class="px-3 py-2">제품명 / 정보</th>
-                            <th class="px-3 py-2 text-right">잔여 유효기간</th>
-                            <th class="px-3 py-2 text-right">비고</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        <!-- Critical -->
-                        <tr>
-                            <td class="px-3 py-3"><span class="badge-risk">반품권고</span></td>
-                            <td class="px-3 py-3">
-                                <div class="font-bold text-gray-800">리피토정 20mg (300정)</div>
-                                <div class="text-xs text-gray-500">전문의약품 | Lot. 23004</div>
-                            </td>
-                            <td class="px-3 py-3 text-right text-red-600 font-bold">3개월 (26.04.10)</td>
-                            <td class="px-3 py-3 text-right text-xs text-gray-500">실재고 점검 필요</td>
-                        </tr>
-                        <tr>
-                            <td class="px-3 py-3"><span class="badge-risk">반품권고</span></td>
-                            <td class="px-3 py-3">
-                                <div class="font-bold text-gray-800">종근당 락토핏 골드</div>
-                                <div class="text-xs text-gray-500">건강기능식품 | 50포 기획</div>
-                            </td>
-                            <td class="px-3 py-3 text-right text-red-600 font-bold">2개월 (26.03.28)</td>
-                            <td class="px-3 py-3 text-right text-xs text-gray-500">실재고 점검 필요</td>
-                        </tr>
-                        <!-- Warning -->
-                        <tr>
-                            <td class="px-3 py-3"><span class="badge-warning">재고주의</span></td>
-                            <td class="px-3 py-3">
-                                <div class="font-bold text-gray-800">탁센연질캡슐</div>
-                                <div class="text-xs text-gray-500">일반의약품 | 10팩</div>
-                            </td>
-                            <td class="px-3 py-3 text-right text-orange-600 font-bold">10개월 (26.11.20)</td>
-                            <td class="px-3 py-3 text-right text-xs text-gray-500">선입선출 관리</td>
-                        </tr>
-                        <tr>
-                            <td class="px-3 py-3"><span class="badge-warning">재고주의</span></td>
-                            <td class="px-3 py-3">
-                                <div class="font-bold text-gray-800">박카스D액 (100병)</div>
-                                <div class="text-xs text-gray-500">의약외품</div>
-                            </td>
-                            <td class="px-3 py-3 text-right text-orange-600 font-bold">11개월 (26.12.01)</td>
-                            <td class="px-3 py-3 text-right text-xs text-gray-500">선입선출 관리</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <p class="text-[11px] text-gray-500 mb-4 flex items-start gap-2 leading-relaxed">
+                    <i class="fa-solid fa-circle-info mt-[2px] text-gray-400"></i>
+                    <span>이번달 거래명세서에서 매입된 제품들의 잔여 유효기간입니다.</span>
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <div class="h-64 relative">
+                            <canvas id="expiryRankingChart"></canvas>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- 3. Supplier Portfolio (Segmented) -->
-            <section class="card-shadow rounded-xl p-5 bg-white">
+            <section class="card-shadow rounded-xl p-5 bg-white" data-mobile-tabs="supplier-portfolio" data-default-tab="etc" data-resize-charts="true">
                 <div class="flex items-center space-x-2 mb-4">
                     <i class="fa-solid fa-truck-field text-green-600"></i>
                     <h3 class="font-bold text-gray-800">공급사 포트폴리오 (부문별 점유율)</h3>
                 </div>
+
+                <!-- Mobile Tabs (only on small screens) -->
+                <div class="mobile-tablist sm:hidden mb-4" role="tablist" aria-label="공급사 포트폴리오 탭">
+                    <button type="button" class="tab-btn tab-btn-etc" role="tab" id="supplier-portfolio-tab-etc" data-tab-button="etc" aria-controls="supplier-portfolio-panel-etc" aria-selected="true" tabindex="0">
+                        전문의약품
+                    </button>
+                    <button type="button" class="tab-btn tab-btn-otc" role="tab" id="supplier-portfolio-tab-otc" data-tab-button="otc" aria-controls="supplier-portfolio-panel-otc" aria-selected="false" tabindex="-1">
+                        일반의약품
+                    </button>
+                    <button type="button" class="tab-btn tab-btn-health" role="tab" id="supplier-portfolio-tab-health" data-tab-button="health" aria-controls="supplier-portfolio-panel-health" aria-selected="false" tabindex="-1">
+                        건기식
+                    </button>
+                </div>
                 
                 <div class="grid grid-cols-3 gap-6">
                     <!-- ETC -->
-                    <div>
+                    <div data-tab-panel="etc" id="supplier-portfolio-panel-etc" role="tabpanel" aria-labelledby="supplier-portfolio-tab-etc">
                         <h4 class="text-xs font-bold text-gray-500 uppercase mb-2 border-b pb-1">전문의약품 (ETC)</h4>
                         <!-- Increased height for more items -->
                         <div class="h-48 relative">
@@ -325,7 +502,7 @@
                         </div>
                     </div>
                     <!-- OTC -->
-                    <div>
+                    <div data-tab-panel="otc" id="supplier-portfolio-panel-otc" role="tabpanel" aria-labelledby="supplier-portfolio-tab-otc">
                         <h4 class="text-xs font-bold text-gray-500 uppercase mb-2 border-b pb-1">일반의약품 (OTC)</h4>
                         <!-- Increased height for more items -->
                         <div class="h-48 relative">
@@ -333,7 +510,7 @@
                         </div>
                     </div>
                     <!-- Health -->
-                    <div>
+                    <div data-tab-panel="health" id="supplier-portfolio-panel-health" role="tabpanel" aria-labelledby="supplier-portfolio-tab-health">
                         <h4 class="text-xs font-bold text-gray-500 uppercase mb-2 border-b pb-1">건강기능식품</h4>
                         <!-- Increased height for more items -->
                         <div class="h-48 relative">
@@ -350,29 +527,28 @@
 
             <!-- 4. Price Competitiveness (Table View) -->
             <section class="card-shadow rounded-xl p-5 bg-white">
-                <div class="flex justify-between items-end mb-4 border-b border-gray-100 pb-2">
+                <div class="flex flex-col items-start gap-2 sm:flex-row sm:justify-between sm:items-end mb-4 border-b border-gray-100 pb-2">
                     <div class="flex items-center space-x-2">
                         <i class="fa-solid fa-tags text-purple-600"></i>
                         <h3 class="font-bold text-gray-800">단가 경쟁력 점검</h3>
                     </div>
-                    <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">기준: 반경 2km 평균 매입가</span>
+                    <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded self-end sm:self-auto">기준: 유사 약국 평균 매입가</span>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Chart Side (Visual Summary) -->
                     <div class="bg-purple-50 rounded-xl p-4 flex flex-col justify-center items-center text-center">
                         <div class="mb-2">
-                            <span class="text-3xl font-bold text-purple-700">12%</span>
+                            <span class="text-3xl font-bold text-purple-700">5%</span>
                             <span class="text-sm text-purple-600 font-medium"> 품목이 평균 초과</span>
                         </div>
                         <p class="text-xs text-gray-600 leading-relaxed px-4">
-                            전체 분석 대상 150개 품목 중 <strong>18개 품목</strong>의 매입가가 지역 평균보다 높게 형성되어 있습니다.
+                            등록된 전체 150개 품목 중 <strong>5개 품목</strong>의 매입가가 지역 평균보다 높게 형성되어 있습니다.
                         </p>
                     </div>
 
                     <!-- List Side (Detail) -->
                     <div>
-                        <h4 class="text-xs font-bold text-gray-500 mb-2">평균가 초과 주요 품목 (Top 5)</h4>
                         <div class="space-y-3">
                             <!-- Item 1 -->
                             <div class="flex justify-between items-center bg-white border border-gray-200 p-3 rounded-lg shadow-sm">
@@ -430,9 +606,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-3 text-center">
-                            <p class="text-xs text-gray-400 font-medium">... 외 13건 확인하기 (PharmxAI 앱)</p>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -443,22 +616,25 @@
                     <i class="fa-solid fa-chart-pie text-blue-500"></i>
                     <h3 class="font-bold text-gray-800">매입 구조 상세 (전체 세부 분류)</h3>
                 </div>
-                
-                <!-- Main Insight Row -->
-                <div class="flex items-center mb-6 bg-blue-50 p-3 rounded-xl border border-blue-100">
-                    <div class="w-24 h-24 mr-4 relative flex-shrink-0">
-                        <canvas id="categoryMainChart"></canvas>
-                    </div>
-                    <div class="flex-1 text-xs text-gray-600 leading-relaxed">
-                        <p class="mb-1"><strong class="text-blue-700">전문의약품(72%)</strong> 비중이 가장 높으며, 이는 안정적인 처방 조제 매출 기반을 의미합니다.</p>
-                        <p>일반의약품과 건기식은 각각 <strong>소화제/영양제</strong>와 <strong>유산균/비타민</strong> 위주로 구성되어 있습니다.</p>
-                    </div>
-                </div>
 
-                <!-- 3 Columns Detail Grid -->
-                <div class="grid grid-cols-3 gap-4 border-t border-gray-100 pt-4">
-                    <!-- ETC Column -->
-                    <div>
+                <!-- 3 Columns Detail Grid (Desktop) + Tabs (Mobile) -->
+                <div class="border-t border-gray-100 pt-4" data-mobile-tabs="category-breakdown" data-default-tab="etc">
+                    <!-- Mobile Tabs (only on small screens) -->
+                    <div class="mobile-tablist sm:hidden mb-4" role="tablist" aria-label="매입 구조 상세 탭">
+                        <button type="button" class="tab-btn tab-btn-etc" role="tab" id="category-breakdown-tab-etc" data-tab-button="etc" aria-controls="category-breakdown-panel-etc" aria-selected="true" tabindex="0">
+                            전문의약품
+                        </button>
+                        <button type="button" class="tab-btn tab-btn-otc" role="tab" id="category-breakdown-tab-otc" data-tab-button="otc" aria-controls="category-breakdown-panel-otc" aria-selected="false" tabindex="-1">
+                            일반의약품
+                        </button>
+                        <button type="button" class="tab-btn tab-btn-health" role="tab" id="category-breakdown-tab-health" data-tab-button="health" aria-controls="category-breakdown-panel-health" aria-selected="false" tabindex="-1">
+                            건기식
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4">
+                        <!-- ETC Column -->
+                        <div data-tab-panel="etc" id="category-breakdown-panel-etc" role="tabpanel" aria-labelledby="category-breakdown-tab-etc">
                         <h5 class="text-xs font-bold text-blue-700 mb-3 border-l-4 border-blue-500 pl-2 uppercase">1. 전문의약품 (ETC)</h5>
                         <ul class="space-y-3">
                             <li class="flex flex-col">
@@ -486,10 +662,10 @@
                                 <div class="progress-bar-bg"><div class="progress-bar-fill bg-gray-300" style="width: 10%"></div></div>
                             </li>
                         </ul>
-                    </div>
+                        </div>
 
-                    <!-- OTC Column -->
-                    <div>
+                        <!-- OTC Column -->
+                        <div data-tab-panel="otc" id="category-breakdown-panel-otc" role="tabpanel" aria-labelledby="category-breakdown-tab-otc">
                         <h5 class="text-xs font-bold text-green-700 mb-3 border-l-4 border-green-500 pl-2 uppercase">2. 일반의약품 (OTC)</h5>
                         <ul class="space-y-3">
                             <li class="flex flex-col">
@@ -517,10 +693,10 @@
                                 <div class="progress-bar-bg"><div class="progress-bar-fill bg-gray-300" style="width: 5%"></div></div>
                             </li>
                         </ul>
-                    </div>
+                        </div>
 
-                    <!-- Health Column -->
-                    <div>
+                        <!-- Health Column -->
+                        <div data-tab-panel="health" id="category-breakdown-panel-health" role="tabpanel" aria-labelledby="category-breakdown-tab-health">
                         <h5 class="text-xs font-bold text-yellow-700 mb-3 border-l-4 border-yellow-500 pl-2 uppercase">3. 건강기능식품</h5>
                         <ul class="space-y-3">
                             <li class="flex flex-col">
@@ -548,6 +724,7 @@
                                 <div class="progress-bar-bg"><div class="progress-bar-fill bg-gray-300" style="width: 5%"></div></div>
                             </li>
                         </ul>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -747,120 +924,72 @@
             <!-- 6. Special Report: PharmxAI Ontology Discovery -->
             <section class="card-shadow rounded-xl p-0 overflow-hidden bg-slate-900 text-white page-break-inside-avoid page-break">
                 <!-- Header -->
-                <div class="bg-slate-800 p-6 flex justify-between items-center border-b border-slate-700">
-                    <div>
+                <div class="bg-slate-800 p-6 flex justify-between items-center border-b border-slate-700 peer-universe-header">
+                    <div class="ko-keepall">
                         <span class="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-900 bg-opacity-30 px-2 py-1 rounded">Ontology Discovery</span>
                         <h2 class="text-2xl font-bold mt-2 text-white">PharmxAI 피어그룹 유니버스</h2>
                         <p class="text-xs text-slate-400 mt-1">약국 데이터 네트워크 분석 결과</p>
                     </div>
-                    <div class="text-right">
+                    <div class="peer-universe-icon text-right">
                         <i class="fa-solid fa-project-diagram text-4xl text-emerald-500 opacity-50"></i>
                     </div>
                 </div>
 
                 <div class="p-6">
-                    <p class="text-sm text-gray-400 mb-8 leading-relaxed text-center">
-                        PharmxAI 온톨로지(Ontology)가 <strong>병원·기상·입지·매입 데이터</strong>를 종합 분석하여<br>
-                        사장님 약국의 경영 특성과 가장 유사한 <strong>5가지 피어그룹</strong>을 도출했습니다.
+                    <p class="ko-keepall text-sm text-gray-400 mb-8 leading-relaxed text-center">
+                        PharmxAI가 <strong>약국과 인접한 병원·배후지역 통계 데이터가 통합된 온톨로지</strong>를 종합 분석하여<br>
+                        행복한 약국과 유사한 <strong>5가지 피어그룹</strong>을 도출했습니다.
                     </p>
 
-                    <div class="flex gap-8">
-                        <!-- Left Column: Visual Network Map -->
-                        <div class="w-1/2 flex items-center justify-center">
-                            <div class="relative w-[300px] h-[300px]">
-                                <!-- Connecting Lines -->
-                                <div class="network-line w-[130px] top-1/2 left-1/2 rotate-[270deg]"></div>
-                                <div class="network-line w-[130px] top-1/2 left-1/2 rotate-[342deg]"></div>
-                                <div class="network-line w-[130px] top-1/2 left-1/2 rotate-[54deg]"></div>
-                                <div class="network-line w-[130px] top-1/2 left-1/2 rotate-[126deg]"></div>
-                                <div class="network-line w-[130px] top-1/2 left-1/2 rotate-[198deg]"></div>
-
-                                <!-- Center Node -->
-                                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 network-center w-16 h-16 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                                    <i class="fa-solid fa-store text-2xl"></i>
-                                    <span class="absolute -bottom-6 text-xs font-bold text-white whitespace-nowrap">내 약국</span>
+                    <div class="peer-universe-cards grid grid-cols-2 gap-3 ko-keepall">
+                        <!-- Card 1 -->
+                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-blue-500">
+                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-graduation-cap text-blue-400"></i></div>
+                            <div>
+                                <div class="flex justify-between items-center w-full mb-1">
+                                    <h4 class="text-sm font-bold text-white">학원가 집중형 (94%)</h4>
                                 </div>
-
-                                <!-- Satellite Nodes -->
-                                <!-- Top -->
-                                <div class="absolute top-[5%] left-1/2 -translate-x-1/2 flex flex-col items-center network-node w-12 h-12 rounded-full justify-center">
-                                    <i class="fa-solid fa-graduation-cap text-blue-400"></i>
-                                    <span class="absolute -bottom-5 text-[10px] text-slate-300 font-bold whitespace-nowrap">학원가 집중형</span>
-                                </div>
-                                <!-- Top Right -->
-                                <div class="absolute top-[30%] right-[5%] flex flex-col items-center network-node w-12 h-12 rounded-full justify-center">
-                                    <i class="fa-solid fa-notes-medical text-green-400"></i>
-                                    <span class="absolute -bottom-5 text-[10px] text-slate-300 font-bold whitespace-nowrap">장기 처방형</span>
-                                </div>
-                                <!-- Bottom Right -->
-                                <div class="absolute bottom-[10%] right-[15%] flex flex-col items-center network-node w-12 h-12 rounded-full justify-center">
-                                    <i class="fa-solid fa-crown text-yellow-400"></i>
-                                    <span class="absolute -bottom-5 text-[10px] text-slate-300 font-bold whitespace-nowrap">프리미엄 실버형</span>
-                                </div>
-                                <!-- Bottom Left -->
-                                <div class="absolute bottom-[10%] left-[15%] flex flex-col items-center network-node w-12 h-12 rounded-full justify-center">
-                                    <i class="fa-solid fa-boxes-packing text-purple-400"></i>
-                                    <span class="absolute -bottom-5 text-[10px] text-slate-300 font-bold whitespace-nowrap">재고 고회전형</span>
-                                </div>
-                                <!-- Top Left -->
-                                <div class="absolute top-[30%] left-[5%] flex flex-col items-center network-node w-12 h-12 rounded-full justify-center">
-                                    <i class="fa-solid fa-cloud-sun text-sky-400"></i>
-                                    <span class="absolute -bottom-5 text-[10px] text-slate-300 font-bold whitespace-nowrap">날씨 민감형</span>
-                                </div>
+                                <p class="text-xs text-gray-400">학원가 밀집 지역으로 하원 시간대(17-19시) 청소년 처방 유입이 집중됨.</p>
                             </div>
                         </div>
-
-                        <!-- Right Column: Detail List -->
-                        <div class="w-1/2 space-y-3">
-                            <!-- List Item 1 -->
-                            <div class="flex items-start space-x-3 p-3 rounded bg-slate-800 border-l-4 border-blue-500">
-                                <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-graduation-cap text-blue-400"></i></div>
-                                <div>
-                                    <div class="flex justify-between items-center w-full mb-1">
-                                        <h4 class="text-sm font-bold text-white">학원가 집중형 (94%)</h4>
-                                    </div>
-                                    <p class="text-xs text-gray-400">학원가 밀집 지역으로 하원 시간대(17-19시) 청소년 처방 유입이 집중됨.</p>
+                        <!-- Card 2 -->
+                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-purple-500">
+                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-boxes-packing text-purple-400"></i></div>
+                            <div>
+                                <div class="flex justify-between items-center w-full mb-1">
+                                    <h4 class="text-sm font-bold text-white">재고 고회전형 (91%)</h4>
                                 </div>
+                                <p class="text-xs text-gray-400">소형 평수의 한계를 빈번한 주문(High Frequency)으로 극복하며 재고 비용을 최소화하는 운영 고수입니다.</p>
                             </div>
-                            <!-- List Item 2 -->
-                            <div class="flex items-start space-x-3 p-3 rounded bg-slate-800 border-l-4 border-purple-500">
-                                <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-boxes-packing text-purple-400"></i></div>
-                                <div>
-                                    <div class="flex justify-between items-center w-full mb-1">
-                                        <h4 class="text-sm font-bold text-white">재고 고회전형 (91%)</h4>
-                                    </div>
-                                    <p class="text-xs text-gray-400">소형 평수의 한계를 빈번한 주문(High Frequency)으로 극복하며 재고 비용을 최소화하는 운영 고수입니다.</p>
+                        </div>
+                        <!-- Card 3 -->
+                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-green-500">
+                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-notes-medical text-green-400"></i></div>
+                            <div>
+                                <div class="flex justify-between items-center w-full mb-1">
+                                    <h4 class="text-sm font-bold text-white">장기 처방형 (89%)</h4>
                                 </div>
+                                <p class="text-xs text-gray-400">30일 이상 장기 처방 조제 비율 80% 이상. 단골 환자 의존도 높음.</p>
                             </div>
-                            <!-- List Item 3 -->
-                            <div class="flex items-start space-x-3 p-3 rounded bg-slate-800 border-l-4 border-green-500">
-                                <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-notes-medical text-green-400"></i></div>
-                                <div>
-                                    <div class="flex justify-between items-center w-full mb-1">
-                                        <h4 class="text-sm font-bold text-white">장기 처방형 (89%)</h4>
-                                    </div>
-                                    <p class="text-xs text-gray-400">30일 이상 장기 처방 조제 비율 80% 이상. 단골 환자 의존도 높음.</p>
+                        </div>
+                        <!-- Card 4 -->
+                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-yellow-500">
+                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-crown text-yellow-400"></i></div>
+                            <div>
+                                <div class="flex justify-between items-center w-full mb-1">
+                                    <h4 class="text-sm font-bold text-white">프리미엄 실버형 (88%)</h4>
                                 </div>
+                                <p class="text-xs text-gray-400">소득 상위 20% 지역 + 노인 인구. 고가 건기식 및 프리미엄 드링크 구매력 높음.</p>
                             </div>
-                            <!-- List Item 4 -->
-                            <div class="flex items-start space-x-3 p-3 rounded bg-slate-800 border-l-4 border-yellow-500">
-                                <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-crown text-yellow-400"></i></div>
-                                <div>
-                                    <div class="flex justify-between items-center w-full mb-1">
-                                        <h4 class="text-sm font-bold text-white">프리미엄 실버형 (88%)</h4>
-                                    </div>
-                                    <p class="text-xs text-gray-400">소득 상위 20% 지역 + 노인 인구. 고가 건기식 및 프리미엄 드링크 구매력 높음.</p>
+                        </div>
+                        <!-- Card 5 -->
+                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-sky-500">
+                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-cloud-sun text-sky-400"></i></div>
+                            <div>
+                                <div class="flex justify-between items-center w-full mb-1">
+                                    <h4 class="text-sm font-bold text-white">날씨 민감형 (85%)</h4>
                                 </div>
-                            </div>
-                            <!-- List Item 5 -->
-                            <div class="flex items-start space-x-3 p-3 rounded bg-slate-800 border-l-4 border-sky-500">
-                                <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-cloud-sun text-sky-400"></i></div>
-                                <div>
-                                    <div class="flex justify-between items-center w-full mb-1">
-                                        <h4 class="text-sm font-bold text-white">날씨 민감형 (85%)</h4>
-                                    </div>
-                                    <p class="text-xs text-gray-400">기온 급변 시 호흡기 질환 환자 즉각 반응. 날씨 기반 재고 관리 필요.</p>
-                                </div>
+                                <p class="text-xs text-gray-400">기온 급변 시 호흡기 질환 환자 즉각 반응. 날씨 기반 재고 관리 필요.</p>
                             </div>
                         </div>
                     </div>
@@ -994,6 +1123,8 @@
 
     <!-- Script for Charts -->
     <script>
+        window.__pharmxaiCharts = window.__pharmxaiCharts || {};
+
         // --- 1. Supplier Charts (ETC, OTC, Health) ---
         const commonOptions = {
             indexAxis: 'y',
@@ -1007,7 +1138,7 @@
         };
 
         // ETC Supplier Chart (All Suppliers, No Others)
-        new Chart(document.getElementById('supplierEtcChart'), {
+        window.__pharmxaiCharts['supplierEtcChart'] = new Chart(document.getElementById('supplierEtcChart'), {
             type: 'bar',
             data: {
                 labels: ['감마약품', '알파약품', '베타약품', '시그마팜', '동행약품', '메디컬서플라이'],
@@ -1021,7 +1152,7 @@
         });
 
         // OTC Supplier Chart (All Suppliers, No Others)
-        new Chart(document.getElementById('supplierOtcChart'), {
+        window.__pharmxaiCharts['supplierOtcChart'] = new Chart(document.getElementById('supplierOtcChart'), {
             type: 'bar',
             data: {
                 labels: ['알파약품', '델타팜', '감마약품', '힐링메디', '웰빙팜'],
@@ -1035,7 +1166,7 @@
         });
 
         // Health Supplier Chart (All Suppliers, No Others)
-        new Chart(document.getElementById('supplierHealthChart'), {
+        window.__pharmxaiCharts['supplierHealthChart'] = new Chart(document.getElementById('supplierHealthChart'), {
             type: 'bar',
             data: {
                 labels: ['오메가팜', '델타팜', '네이처푸드', '비타민뱅크'],
@@ -1048,8 +1179,229 @@
             options: commonOptions
         });
 
-        // --- 2. Category Main Chart ---
-        new Chart(document.getElementById('categoryMainChart'), {
+        // --- 2. Purchase Mix Snapshot Chart ---
+        const purchaseMixMeta = {
+            labels: ['전문약', '일반약', '건기식', '외품'],
+            colors: ['#2563EB', '#10B981', '#F59E0B', '#9CA3AF']
+        };
+
+        const formatWon = (value) => `₩${Math.round(value).toLocaleString('ko-KR')}`;
+        const formatQty = (value) => `${Math.round(value).toLocaleString('ko-KR')}개`;
+
+        const purchaseMixByBasis = {
+            amount: {
+                basisLabel: '금액 기준',
+                values: [30643200, 7660800, 2979200, 1276800],
+                totalLabel: '총 금액',
+                formatValue: formatWon
+            },
+            quantity: {
+                basisLabel: '수량 기준',
+                values: [6200, 2500, 900, 240],
+                totalLabel: '총 수량',
+                formatValue: formatQty
+            }
+        };
+
+        const purchaseMixLabelsPlugin = {
+            id: 'purchaseMixLabels',
+            afterDatasetDraw(chart, args, pluginOptions) {
+                if (args.index !== 0) return;
+
+                const options = pluginOptions || {};
+                const minInsidePercent = typeof options.minInsidePercent === 'number' ? options.minInsidePercent : 8;
+                const outsideOffset = typeof options.outsideOffset === 'number' ? options.outsideOffset : 14;
+                const fontSize = typeof options.fontSize === 'number' ? options.fontSize : 9;
+                const fontWeight = options.fontWeight || 800;
+                const fontFamily = options.fontFamily || "'Noto Sans KR', sans-serif";
+
+                const data = (chart.data?.datasets?.[0]?.data || []).map((v) => Number(v) || 0);
+                const total = data.reduce((sum, v) => sum + v, 0);
+                if (!total) return;
+
+                const meta = chart.getDatasetMeta(0);
+                const labels = chart.data.labels || [];
+                const { ctx } = chart;
+
+                ctx.save();
+                ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+                ctx.textBaseline = 'middle';
+
+                meta.data.forEach((arc, index) => {
+                    const value = data[index];
+                    if (!value) return;
+
+                    const percent = Math.round((value / total) * 100);
+                    const label = String(labels[index] ?? '');
+                    if (!label) return;
+
+                    const angle = (arc.startAngle + arc.endAngle) / 2;
+                    const cos = Math.cos(angle);
+                    const sin = Math.sin(angle);
+
+                    if (percent < minInsidePercent) {
+                        const fromX = arc.x + cos * arc.outerRadius;
+                        const fromY = arc.y + sin * arc.outerRadius;
+                        const toX = arc.x + cos * (arc.outerRadius + outsideOffset);
+                        const toY = arc.y + sin * (arc.outerRadius + outsideOffset);
+
+                        ctx.strokeStyle = options.lineColor || 'rgba(17, 24, 39, 0.35)';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(fromX, fromY);
+                        ctx.lineTo(toX, toY);
+                        ctx.stroke();
+
+                        const edgeMargin = typeof options.edgeMargin === 'number' ? options.edgeMargin : 6;
+                        const clampedY = Math.min(Math.max(toY, edgeMargin), chart.height - edgeMargin);
+
+                        ctx.fillStyle = options.outsideTextColor || '#111827';
+                        if (cos >= 0) {
+                            ctx.textAlign = 'right';
+                            ctx.fillText(label, Math.min(toX + 4, chart.width - edgeMargin), clampedY);
+                        } else {
+                            ctx.textAlign = 'left';
+                            ctx.fillText(label, Math.max(toX - 4, edgeMargin), clampedY);
+                        }
+                        return;
+                    }
+
+                    const r = (arc.innerRadius + arc.outerRadius) / 2;
+                    const x = arc.x + cos * r;
+                    const y = arc.y + sin * r;
+
+                    ctx.fillStyle = options.insideTextColor || '#FFFFFF';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(label, x, y);
+                });
+
+                ctx.restore();
+            }
+        };
+
+        const purchaseMixChartEl = document.getElementById('purchaseMixChart');
+        if (purchaseMixChartEl) {
+            window.__pharmxaiCharts['purchaseMixChart'] = new Chart(purchaseMixChartEl, {
+                type: 'doughnut',
+                data: {
+                    labels: purchaseMixMeta.labels,
+                    datasets: [{
+                        data: purchaseMixByBasis.amount.values,
+                        backgroundColor: purchaseMixMeta.colors,
+                        borderWidth: 0
+                    }]
+                },
+                plugins: [purchaseMixLabelsPlugin],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: 22 },
+                    plugins: {
+                        legend: { display: false },
+                        purchaseMixLabels: { minInsidePercent: 8, outsideOffset: 14, fontSize: 9 }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        (function initPurchaseMixBasisToggle() {
+            const chart = window.__pharmxaiCharts?.purchaseMixChart;
+            const breakdownEl = document.getElementById('purchaseMixBreakdown');
+            const basisTextEl = document.getElementById('purchaseMixBasisText');
+            const toggleEl = document.querySelector('[data-purchase-mix-toggle]');
+            if (!chart || !breakdownEl || !toggleEl) return;
+
+            const buttons = Array.from(toggleEl.querySelectorAll('button[data-basis]'));
+            if (!buttons.length) return;
+
+            const setButtonActive = (btn, active) => {
+                btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+                btn.classList.toggle('bg-white', active);
+                btn.classList.toggle('text-gray-900', active);
+                btn.classList.toggle('shadow-sm', active);
+                btn.classList.toggle('border-gray-200', active);
+                btn.classList.toggle('border-transparent', !active);
+                btn.classList.toggle('text-gray-500', !active);
+            };
+
+            const renderBreakdown = (basis) => {
+                const config = purchaseMixByBasis[basis] || purchaseMixByBasis.amount;
+                const values = config.values || [];
+                const total = values.reduce((sum, v) => sum + (Number(v) || 0), 0);
+
+                breakdownEl.innerHTML = '';
+
+                purchaseMixMeta.labels.forEach((label, index) => {
+                    const value = Number(values[index]) || 0;
+                    const percent = total ? Math.round((value / total) * 100) : 0;
+
+                    const row = document.createElement('div');
+                    row.className = 'grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-2';
+
+                    const left = document.createElement('div');
+                    left.className = 'flex items-center gap-2 min-w-0';
+
+                    const dot = document.createElement('span');
+                    dot.className = 'inline-block w-2.5 h-2.5 rounded-full flex-shrink-0';
+                    dot.style.backgroundColor = purchaseMixMeta.colors[index] || '#9CA3AF';
+
+                    const name = document.createElement('span');
+                    name.className = 'font-bold text-gray-900 truncate';
+                    name.textContent = label;
+
+                    const pct = document.createElement('span');
+                    pct.className = 'text-xs md:text-[10px] font-bold text-gray-500 flex-shrink-0';
+                    pct.textContent = `${percent}%`;
+
+                    left.append(dot, name, pct);
+
+                    const val = document.createElement('span');
+                    val.className = 'font-extrabold text-gray-900 tabular-nums whitespace-nowrap text-right';
+                    val.textContent = config.formatValue(value);
+
+                    row.append(left, val);
+                    breakdownEl.append(row);
+                });
+
+                const totalRow = document.createElement('div');
+                totalRow.className = 'grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-2.5 bg-gray-50';
+
+                const totalLabel = document.createElement('span');
+                totalLabel.className = 'text-xs md:text-[10px] font-bold text-gray-600';
+                totalLabel.textContent = config.totalLabel;
+
+                const totalValue = document.createElement('span');
+                totalValue.className = 'font-extrabold text-gray-900 tabular-nums whitespace-nowrap text-right';
+                totalValue.textContent = config.formatValue(total);
+
+                totalRow.append(totalLabel, totalValue);
+                breakdownEl.append(totalRow);
+            };
+
+            const setBasis = (basis) => {
+                const nextBasis = purchaseMixByBasis[basis] ? basis : 'amount';
+                const config = purchaseMixByBasis[nextBasis];
+
+                chart.data.labels = purchaseMixMeta.labels;
+                chart.data.datasets[0].data = config.values;
+                chart.update();
+
+                if (basisTextEl) basisTextEl.textContent = config.basisLabel;
+                renderBreakdown(nextBasis);
+
+                buttons.forEach((btn) => setButtonActive(btn, btn.getAttribute('data-basis') === nextBasis));
+            };
+
+            buttons.forEach((btn) => {
+                btn.addEventListener('click', () => setBasis(btn.getAttribute('data-basis')));
+            });
+
+            setBasis('amount');
+        })();
+
+        // --- 3. Category Main Chart ---
+        window.__pharmxaiCharts['categoryMainChart'] = new Chart(document.getElementById('categoryMainChart'), {
             type: 'doughnut',
             data: {
                 labels: ['전문약', '일반약', '건기식', '외품'],
@@ -1069,8 +1421,93 @@
             }
         });
 
-        // --- 3. Inventory Prediction Chart (AI) ---
-        new Chart(document.getElementById('inventoryPredictionChart'), {
+        // --- 4. Incoming Expiry Ranking Chart (Purchase-based) ---
+        const expiryRankingLabels = [
+            '종근당 락토핏 골드',
+            '리피토정 20mg (300정)',
+            '타이레놀ER 650mg',
+            '후시딘연고 5g',
+            '이가탄F캡슐',
+            '임팩타민프리미엄',
+            '탁센연질캡슐',
+            '베나치오큐액',
+            '박카스D액 (100병)',
+            '오메가3 1000 (180캡슐)',
+            '루테인 지아잔틴',
+            '프로바이오틱스 30일분'
+        ];
+        // 기준일: 26.01.31 / 제품별(해당 월 매입분 중) 가장 빠른 만료일 기준 예시값
+        const expiryRankingMonths = [10.3, 14.2, 18.6, 20.1, 21.3, 22.8, 24.5, 26.0, 28.4, 30.2, 31.8, 34.0];
+        const expiryRankingDates = ['26.12.10', '27.04.15', '27.08.20', '27.10.05', '27.11.10', '27.12.25', '28.02.20', '28.03.31', '28.06.15', '28.08.05', '28.09.25', '28.12.10'];
+        const getExpiryColor = (months) => {
+            if (months < 12) return '#DC2626'; // red-600
+            if (months < 18) return '#F97316'; // orange-500
+            if (months < 24) return '#F59E0B'; // amber-500
+            return '#10B981'; // emerald-500
+        };
+        const expiryRankingColors = expiryRankingMonths.map(getExpiryColor);
+
+        window.__pharmxaiCharts['expiryRankingChart'] = new Chart(document.getElementById('expiryRankingChart'), {
+            type: 'bar',
+            data: {
+                labels: expiryRankingLabels,
+                datasets: [{
+                    label: '잔여 유효기간(개월)',
+                    data: expiryRankingMonths,
+                    backgroundColor: expiryRankingColors,
+                    borderRadius: 4,
+                    barThickness: 10
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => items?.[0]?.label ?? '',
+                            label: (context) => {
+                                const months = context.raw;
+                                const date = expiryRankingDates[context.dataIndex];
+                                return `잔여 유효기간: ${Number(months).toFixed(1)}개월 (유통기한 ${date})`;
+                            },
+                            footer: () => '기준일: 26.01.31 · 제품별 가장 빠른 만료일'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        suggestedMax: 36,
+                        grid: { color: 'rgba(148, 163, 184, 0.25)' },
+                        ticks: {
+                            stepSize: 6,
+                            font: { size: 10, family: "'Noto Sans KR'" },
+                            callback: (v) => {
+                                if (v === 0) return '0';
+                                if (v % 12 === 0) return `${v / 12}년`;
+                                return `${v}개월`;
+                            }
+                        }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 10, family: "'Noto Sans KR'" },
+                            callback: function (value) {
+                                const label = this.getLabelForValue(value);
+                                return label.length > 14 ? `${label.slice(0, 14)}…` : label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- 5. Inventory Prediction Chart (AI) ---
+        window.__pharmxaiCharts['inventoryPredictionChart'] = new Chart(document.getElementById('inventoryPredictionChart'), {
             type: 'line',
             data: {
                 labels: ['10월', '11월', '12월', '1월', '2월', '3월(예측)'],
@@ -1109,6 +1546,98 @@
                 }
             }
         });
+
+        // --- Mobile Tabs (ETC / OTC / Health) ---
+        (function initReportMobileTabs() {
+            const tabGroups = Array.from(document.querySelectorAll('[data-mobile-tabs]'));
+            if (!tabGroups.length) return;
+
+            const isMobile = () => window.matchMedia('(max-width: 639px)').matches;
+
+            const resizeChartsIn = (container) => {
+                const charts = window.__pharmxaiCharts || {};
+                container.querySelectorAll('canvas[id]').forEach((canvas) => {
+                    const chart = charts[canvas.id];
+                    if (!chart) return;
+                    chart.resize();
+                    chart.update('none');
+                });
+            };
+
+            const setActiveTab = (groupEl, nextTab) => {
+                const buttons = Array.from(groupEl.querySelectorAll('[data-tab-button]'));
+                const panels = Array.from(groupEl.querySelectorAll('[data-tab-panel]'));
+                if (!buttons.length || !panels.length) return;
+
+                const defaultTab = groupEl.getAttribute('data-default-tab') || buttons[0].getAttribute('data-tab-button');
+                const activeTab = nextTab || groupEl.dataset.activeTab || defaultTab;
+                groupEl.dataset.activeTab = activeTab;
+
+                const mobile = isMobile();
+
+                buttons.forEach((btn) => {
+                    const key = btn.getAttribute('data-tab-button');
+                    const selected = key === activeTab;
+                    btn.setAttribute('aria-selected', selected ? 'true' : 'false');
+                    btn.setAttribute('tabindex', selected ? '0' : '-1');
+                });
+
+                panels.forEach((panel) => {
+                    const key = panel.getAttribute('data-tab-panel');
+                    const selected = key === activeTab;
+                    panel.hidden = mobile ? !selected : false;
+                });
+
+                if (mobile && groupEl.getAttribute('data-resize-charts') === 'true') {
+                    const activePanel = groupEl.querySelector(`[data-tab-panel="${activeTab}"]`);
+                    if (activePanel) resizeChartsIn(activePanel);
+                }
+            };
+
+            const attachKeyboardNav = (groupEl) => {
+                const buttons = Array.from(groupEl.querySelectorAll('[data-tab-button]'));
+                if (buttons.length < 2) return;
+
+                buttons.forEach((btn, index) => {
+                    btn.addEventListener('keydown', (e) => {
+                        const key = e.key;
+                        if (key !== 'ArrowLeft' && key !== 'ArrowRight' && key !== 'Home' && key !== 'End') return;
+                        e.preventDefault();
+
+                        const lastIndex = buttons.length - 1;
+                        const nextIndex = key === 'Home'
+                            ? 0
+                            : key === 'End'
+                                ? lastIndex
+                                : key === 'ArrowLeft'
+                                    ? (index === 0 ? lastIndex : index - 1)
+                                    : (index === lastIndex ? 0 : index + 1);
+
+                        const nextBtn = buttons[nextIndex];
+                        if (!nextBtn) return;
+                        nextBtn.focus();
+                        setActiveTab(groupEl, nextBtn.getAttribute('data-tab-button'));
+                    });
+                });
+            };
+
+            tabGroups.forEach((groupEl) => {
+                const buttons = Array.from(groupEl.querySelectorAll('[data-tab-button]'));
+                if (!buttons.length) return;
+
+                setActiveTab(groupEl);
+                attachKeyboardNav(groupEl);
+
+                buttons.forEach((btn) => {
+                    btn.addEventListener('click', () => setActiveTab(groupEl, btn.getAttribute('data-tab-button')));
+                });
+            });
+
+            const refreshAll = () => tabGroups.forEach((groupEl) => setActiveTab(groupEl));
+            const mq = window.matchMedia('(max-width: 639px)');
+            if (mq.addEventListener) mq.addEventListener('change', refreshAll);
+            else window.addEventListener('resize', refreshAll);
+        })();
     </script>
 </body>
 </html>
