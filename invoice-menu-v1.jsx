@@ -23,13 +23,13 @@ const INVOICE_A_ID = 'INV-2026-001';
 const INVOICE_B_ID = 'INV-2026-002';
 const INVOICE_C_ID = 'INV-2026-003';
 const DAILY_UPLOAD_INVOICE_IDS = [INVOICE_A_ID, INVOICE_B_ID, INVOICE_C_ID];
-const DEFAULT_DATE_LABEL = '2026.01.06 (화)';
+const DEFAULT_DATE_LABEL = '2026.01.14 (수)';
 
 // 명세서별 메타 데이터 (OCR 결과로 추출된 총 세액 정보 등)
 const INVOICE_META = {
   [INVOICE_A_ID]: {
     hasSeparateTax: true, // 세액 별도 표기 명세서
-    taxAmount: 27825,     // 추출된 총 세액 (예시)
+    taxAmount: 54545,     // 추출된 총 세액 (예시)
     status: 'completed',
     failureReason: ''
   },
@@ -75,7 +75,7 @@ const INITIAL_NOTIFICATIONS = [
     id: 1,
     type: 'review',
     title: '검수 필요',
-    description: '비타민하우스 | 2026-001 · 1건',
+    description: '(주)디알에스 | 2026-001 · 1건',
     time: '방금',
     unread: true
   },
@@ -91,7 +91,7 @@ const INITIAL_NOTIFICATIONS = [
     id: 3,
     type: 'completed',
     title: '검수 완료',
-    description: '비타민하우스 | 2026-001',
+    description: '(주)디알에스 | 2026-001',
     time: '1시간 전',
     unread: false
   }
@@ -128,77 +128,35 @@ const STATUS_FILTER_OPTIONS = [
   { id: 'failed', label: '미처리' }
 ];
 
-const RECENT_SEARCHES = ['비타민하우스', '2026-001', '덴타케어포르테'];
+const RECENT_SEARCHES = ['(주)디알에스', '2026-001', '덴타케어포르테'];
 
 const INITIAL_DATA = [
   {
     id: 1,
     invoiceId: INVOICE_A_ID,
-    invoiceName: '비타민하우스 | 2026-001',
+    invoiceName: '(주)디알에스 | 2026-001',
     status: 'completed',
-    name: '백년백세효모골드',
-    standard: '200mg x 180정',
-    qty: 5,
-    price: 14000,
+    name: 'K2칼마디',
+    standard: '',
+    qty: 10,
+    price: 60000,
     lot: 'A260101',
     expiry: '2027-12-31',
     note: '정상',
     isLotMissing: false
   },
   {
-    id: 2,
+    id: 1,
     invoiceId: INVOICE_A_ID,
-    invoiceName: '비타민하우스 | 2026-001',
+    invoiceName: '(주)디알에스 | 2026-001',
     status: 'completed',
-    name: '블랙 비오틴 5000',
-    standard: '1,000mg x 60정',
-    qty: 2,
-    price: 10500,
-    lot: 'A260102',
-    expiry: '2027-10-15',
-    note: '신규입고',
-    isLotMissing: false
-  },
-  {
-    id: 3,
-    invoiceId: INVOICE_A_ID,
-    invoiceName: '비타민하우스 | 2026-001',
-    status: 'completed',
-    name: '알부민비타콤',
-    standard: '20g X 6포 X 5EA',
-    qty: 5,
-    price: 31500,
-    lot: 'A260103',
-    expiry: '2028-03-20',
-    note: '상온보관',
-    isLotMissing: false
-  },
-  {
-    id: 4,
-    invoiceId: INVOICE_A_ID,
-    invoiceName: '비타민하우스 | 2026-001',
-    status: 'completed',
-    name: '완전단백 아미노100',
-    standard: '7g X 30포',
-    qty: 2,
-    price: 10500,
-    lot: 'A260104',
-    expiry: '2028-01-05',
-    note: '행사',
-    isLotMissing: false
-  },
-  {
-    id: 5,
-    invoiceId: INVOICE_A_ID,
-    invoiceName: '비타민하우스 | 2026-001',
-    status: 'completed',
-    name: '쾌요박씨',
-    standard: '500mg X 60캡슐',
+    name: 'K2칼마디',
+    standard: '',
     qty: 1,
-    price: 8750,
-    lot: 'A260105',
-    expiry: '2027-08-30',
-    note: '소량',
+    price:0,
+    lot: 'A260101',
+    expiry: '2027-12-31',
+    note: '정상',
     isLotMissing: false
   },
   {
@@ -645,7 +603,7 @@ export default function PharmxAIApp({ onMenuChange, selectedDate }) {
     [INVOICE_C_ID]: invoiceCGroup
   };
   const invoiceTitlesById = {
-    [INVOICE_A_ID]: '비타민하우스 | 2026-001',
+    [INVOICE_A_ID]: '(주)디알에스 | 2026-001',
     [INVOICE_B_ID]: '(주)마더스팜 | 2026-002',
     [INVOICE_C_ID]: ' | '
   };
@@ -918,7 +876,7 @@ export default function PharmxAIApp({ onMenuChange, selectedDate }) {
           {isInvoiceVisible(INVOICE_A_ID) && (
             <InvoiceSection 
               invoiceId={INVOICE_A_ID}
-              title="비타민하우스 | 2026-001" 
+              title="(주)디알에스 | 2026-001" 
               status={INVOICE_META[INVOICE_A_ID].status} 
               totalAmount={getInvoiceTotal(invoiceAGroup)}
               taxAmount={INVOICE_META[INVOICE_A_ID].taxAmount}
