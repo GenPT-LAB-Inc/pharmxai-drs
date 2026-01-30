@@ -81,6 +81,126 @@
             color: #94a3b8;
             font-size: 0.7rem;
         }
+
+        /* Mobile screen adjustments */
+        @media screen and (max-width: 640px) {
+            header.gradient-header {
+                padding: 1.25rem;
+            }
+            header.gradient-header > .flex {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            header.gradient-header > .flex > div:last-child {
+                width: 100%;
+                font-size: 0.75rem;
+                text-align: left;
+            }
+            header.gradient-header h1 {
+                font-size: 1rem;
+            }
+            header.gradient-header h2 {
+                font-size: 1.5rem;
+                line-height: 2rem;
+            }
+            header.gradient-header .mt-4 {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+            main.space-y-6 > :not([hidden]) ~ :not([hidden]) {
+                margin-top: 1rem;
+            }
+            main .grid {
+                grid-template-columns: 1fr;
+            }
+            main .grid.grid-cols-5 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .p-6 {
+                padding: 1rem;
+            }
+            .p-5 {
+                padding: 1rem;
+            }
+            .p-4 {
+                padding: 0.875rem;
+            }
+
+            .text-3xl {
+                font-size: 1.5rem;
+                line-height: 2rem;
+            }
+            .text-2xl {
+                font-size: 1.25rem;
+                line-height: 1.75rem;
+            }
+            .text-xl {
+                font-size: 1rem;
+                line-height: 1.5rem;
+            }
+
+            main table {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .h-48 {
+                height: 10.5rem;
+            }
+            .h-40 {
+                height: 9rem;
+            }
+
+            .w-24.h-24.flex-shrink-0 {
+                width: 4.5rem;
+                height: 4.5rem;
+            }
+
+            section.bg-slate-900 .flex.gap-8 {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            .w-1/2 {
+                width: 100%;
+            }
+            .w-\[300px\].h-\[300px\] {
+                width: 220px;
+                height: 220px;
+            }
+
+            .bg-gradient-to-r {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                text-align: left;
+            }
+            .items-end {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .algo-tag {
+                font-size: 0.6rem;
+            }
+            .flow-arrow {
+                font-size: 0.6rem;
+            }
+        }
+
+        @media screen and (max-width: 420px) {
+            main .grid.grid-cols-5 {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body class="pb-10">
