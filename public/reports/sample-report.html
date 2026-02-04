@@ -921,77 +921,262 @@
                 </div>
             </section>
 
-            <!-- 6. Special Report: PharmxAI Ontology Discovery -->
+            <!-- 6. Ontology-based Peer Group Map -->
             <section class="card-shadow rounded-xl p-0 overflow-hidden bg-slate-900 text-white page-break-inside-avoid page-break">
                 <!-- Header -->
-                <div class="bg-slate-800 p-6 flex justify-between items-center border-b border-slate-700 peer-universe-header">
-                    <div class="ko-keepall">
-                        <span class="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-900 bg-opacity-30 px-2 py-1 rounded">Ontology Discovery</span>
-                        <h2 class="text-2xl font-bold mt-2 text-white">PharmxAI 피어그룹 유니버스</h2>
-                        <p class="text-xs text-slate-400 mt-1">약국 데이터 네트워크 분석 결과</p>
+                <div class="bg-slate-800 p-6 flex flex-col gap-3 border-b border-slate-700">
+                    <div class="flex justify-between items-center">
+                        <div class="ko-keepall">
+                            <span class="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-900 bg-opacity-30 px-2 py-1 rounded">Ontology Insight</span>
+                            <h2 class="text-2xl font-bold mt-2 text-white">온톨로지 기반 유사그룹 분석</h2>
+                            <p class="text-xs text-slate-400 mt-1">입지·의료기관 + 매입 패턴 + 공급사 전략 통합 분석</p>
+                        </div>
+                        <div class="text-right">
+                            <i class="fa-solid fa-layer-group text-4xl text-emerald-500 opacity-60"></i>
+                        </div>
                     </div>
-                    <div class="peer-universe-icon text-right">
-                        <i class="fa-solid fa-project-diagram text-4xl text-emerald-500 opacity-50"></i>
+                    <div class="flex flex-wrap items-center gap-2 text-[10px] font-bold text-slate-200">
+                        <span class="bg-slate-700 px-2 py-1 rounded-full">입지/의료기관 근접</span>
+                        <span class="bg-slate-700 px-2 py-1 rounded-full">매입·카테고리 믹스</span>
+                        <span class="bg-slate-700 px-2 py-1 rounded-full">공급사·가격 전략</span>
+                        <span class="bg-slate-700 px-2 py-1 rounded-full">분석기간: 최근 12개월</span>
                     </div>
                 </div>
 
-                <div class="p-6">
-                    <p class="ko-keepall text-sm text-gray-400 mb-8 leading-relaxed text-center">
-                        PharmxAI가 <strong>약국과 인접한 병원·배후지역 통계 데이터가 통합된 온톨로지</strong>를 종합 분석하여<br>
-                        행복한 약국과 유사한 <strong>5가지 피어그룹</strong>을 도출했습니다.
+                <div class="p-6 space-y-6">
+                    <p class="ko-keepall text-sm text-slate-300 leading-relaxed text-center">
+                        약국과 인접 병원 데이터, 매입 데이터, 공급사 네트워크를 연결한 온톨로지 기반<br>
+                        약국의 위상공간을 구성하고 유사그룹을 도출합니다.
                     </p>
 
-                    <div class="peer-universe-cards grid grid-cols-2 gap-3 ko-keepall">
-                        <!-- Card 1 -->
-                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-blue-500">
-                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-graduation-cap text-blue-400"></i></div>
-                            <div>
-                                <div class="flex justify-between items-center w-full mb-1">
-                                    <h4 class="text-sm font-bold text-white">학원가 집중형 (94%)</h4>
-                                </div>
-                                <p class="text-xs text-gray-400">학원가 밀집 지역으로 하원 시간대(17-19시) 청소년 처방 유입이 집중됨.</p>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div class="lg:col-span-2 bg-slate-800 rounded-xl p-4 border border-slate-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-bold text-white">유사그룹 위상공간 분석</h4>
+                                <span class="text-[10px] text-slate-400">점 하나 = 약국 1곳</span>
+                            </div>
+                            <div class="h-64 relative rounded-lg" style="background-image: radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.15) 1px, transparent 0); background-size: 14px 14px;">
+                                <canvas id="peerMapChart" role="img" aria-label="유사그룹 위상공간 산점도"></canvas>
                             </div>
                         </div>
-                        <!-- Card 2 -->
-                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-purple-500">
-                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-boxes-packing text-purple-400"></i></div>
+
+                        <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 space-y-4">
                             <div>
-                                <div class="flex justify-between items-center w-full mb-1">
-                                    <h4 class="text-sm font-bold text-white">재고 고회전형 (91%)</h4>
+                                <h4 class="text-sm font-bold text-white mb-2">내 약국 요약</h4>
+                                <p class="text-xs text-slate-300">내 약국은 <span class="text-emerald-300 font-bold">2개 유사그룹</span>에 중첩됩니다.</p>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    <span class="text-[10px] font-bold text-white bg-blue-500/70 px-2 py-1 rounded-full">병원 밀집-만성 처방형</span>
+                                    <span class="text-[10px] font-bold text-white bg-violet-500/70 px-2 py-1 rounded-full">전문과 집중-고난도 조제형</span>
                                 </div>
-                                <p class="text-xs text-gray-400">소형 평수의 한계를 빈번한 주문(High Frequency)으로 극복하며 재고 비용을 최소화하는 운영 고수입니다.</p>
+                                <div class="mt-3 space-y-1 text-[10px] text-slate-300">
+                                    <div class="flex items-start gap-2">
+                                        <span class="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-emerald-300"></span>
+                                        <span>동일 건물: 피부과(진료과: 피부과·가정의학과·소아청소년과·성형외과), 치과</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <span class="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-emerald-300"></span>
+                                        <span>반경 500m: 요양병원 1곳</span>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-xs font-bold text-emerald-300">이 조건의 국내 유사 약국 약 120곳</p>
+                            </div>
+
+                            <div>
+                                <h5 class="text-xs font-bold text-slate-200 mb-2">왜 이 그룹인가?</h5>
+                                <div class="flex flex-wrap gap-1">
+                                    <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">동일 건물 다중 진료과</span>
+                                    <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">반경 500m 요양병원</span>
+                                    <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">피부/소아/성형 처방 비중 상위</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 class="text-xs font-bold text-slate-200 mb-2">유사그룹 범례</h5>
+                                <ul class="space-y-1 text-[10px] text-slate-300">
+                                    <li class="flex items-center gap-2"><span class="inline-block w-2.5 h-2.5 rounded-full bg-sky-400"></span>병원 밀집-만성 처방형</li>
+                                    <li class="flex items-center gap-2"><span class="inline-block w-2.5 h-2.5 rounded-full bg-violet-400"></span>전문과 집중-고난도 조제형</li>
+                                    <li class="flex items-center gap-2"><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400"></span>생활밀착 OTC-계절성형</li>
+                                    <li class="flex items-center gap-2"><span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400"></span>건기식/웰니스 프리미엄형</li>
+                                    <li class="flex items-center gap-2"><span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-400"></span>가격민감-대체조달형</li>
+                                </ul>
                             </div>
                         </div>
-                        <!-- Card 3 -->
-                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-green-500">
-                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-notes-medical text-green-400"></i></div>
-                            <div>
-                                <div class="flex justify-between items-center w-full mb-1">
-                                    <h4 class="text-sm font-bold text-white">장기 처방형 (89%)</h4>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <div class="rounded-xl border border-sky-400/60 bg-slate-800 p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-sm font-bold text-white">병원 밀집-만성 처방형</h4>
+                                <span class="text-[9px] font-bold text-white bg-sky-500 px-2 py-0.5 rounded-full">My Group</span>
+                            </div>
+                            <p class="text-[11px] text-slate-300">내과·정형외과 중심 처방 수요가 안정적으로 유지되는 유형.</p>
+                            <div class="mt-2 flex flex-wrap gap-1">
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">병원 5km 내 12개</span>
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">진료과 다양성 상위 15%</span>
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">ETC 비중 1.7x</span>
+                            </div>
+                            <p class="mt-2 text-[11px] font-bold text-emerald-300">Action: 만성질환군 중심 안전재고 최적화</p>
+                        </div>
+
+                        <div class="rounded-xl border border-violet-400/60 bg-slate-800 p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-sm font-bold text-white">전문과 집중-고난도 조제형</h4>
+                                <span class="text-[9px] font-bold text-white bg-violet-500 px-2 py-0.5 rounded-full">My Group</span>
+                            </div>
+                            <p class="text-[11px] text-slate-300">특정 전문과 매입 집중과 고난도 조제 비중이 높은 유형.</p>
+                            <div class="mt-2 flex flex-wrap gap-1">
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">피부·성형·소아 전문과 밀집</span>
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">치과 인접</span>
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">반경 500m 요양병원</span>
+                            </div>
+                            <p class="mt-2 text-[11px] font-bold text-emerald-300">Action: 전문과 핵심 품목 안정 재고 확보</p>
+                        </div>
+
+                        <!-- 
+                        <div class="rounded-xl border border-emerald-400/60 bg-slate-800 p-4">
+                            <h4 class="text-sm font-bold text-white mb-2">생활밀착 OTC-계절성형</h4>
+                            <p class="text-[11px] text-slate-300">계절성 수요와 생활밀착 OTC 매입 비중이 높은 유형.</p>
+                            <div class="mt-2 flex flex-wrap gap-1">
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">OTC 비중 42%</span>
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">호흡기 품목 변동성 상위</span>
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">공급사 9개 분산</span>
+                            </div>
+                            <p class="mt-2 text-[11px] font-bold text-emerald-300">Action: 시즌성 품목 사전 발주 캘린더 적용</p>
+                        </div>
+
+                        <div class="rounded-xl border border-amber-400/60 bg-slate-800 p-4">
+                            <h4 class="text-sm font-bold text-white mb-2">건기식/웰니스 프리미엄형</h4>
+                            <p class="text-[11px] text-slate-300">건기식·프리미엄 라인 매입 집중도가 높은 유형.</p>
+                            <div class="mt-2 flex flex-wrap gap-1">
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">건기식 매입 2.3x</span>
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">평균 단가 +18%</span>
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">프리미엄 고객 비중 상위</span>
+                            </div>
+                            <p class="mt-2 text-[11px] font-bold text-emerald-300">Action: 세트 판매/구독형 패키지 강화</p>
+                        </div>
+
+                        <div class="rounded-xl border border-rose-400/60 bg-slate-800 p-4">
+                            <h4 class="text-sm font-bold text-white mb-2">가격민감-대체조달형</h4>
+                            <p class="text-[11px] text-slate-300">가격 탄력성이 높아 공급사/단가 효율을 우선하는 유형.</p>
+                            <div class="mt-2 flex flex-wrap gap-1">
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">평균 단가 -9%</span>
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">대체 공급사 4개 보유</span>
+                                <span class="text-[10px] text-slate-200 bg-slate-700 px-2 py-1 rounded">가격 민감도 상위</span>
+                            </div>
+                            <p class="mt-2 text-[11px] font-bold text-emerald-300">Action: 주요 품목 대체처 확보율 유지</p>
+                        </div>
+                        -->
+
+                    <div class="rounded-xl border border-slate-700 bg-slate-800 p-4">
+                        <div class="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+                            <h4 class="text-sm font-bold text-white">유사그룹 퍼포먼스 비교</h4>
+                            <span class="text-[10px] text-slate-400">상위 20% vs 내 약국 (최근 12개월, 동일 입지·면적 조건)</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="rounded-lg border border-slate-700 bg-slate-900/40 p-3">
+                                <div class="text-[11px] font-bold text-emerald-300 mb-2">상위 20% 약국 평균</div>
+                                <div class="space-y-2 text-[11px]">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-300">OTC 매입 비중</span>
+                                        <span class="font-bold text-white">32%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-300">건기식 매입 비중</span>
+                                        <span class="font-bold text-white">18%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-300">ETC 매입 비중</span>
+                                        <span class="font-bold text-white">50%</span>
+                                    </div>
                                 </div>
-                                <p class="text-xs text-gray-400">30일 이상 장기 처방 조제 비율 80% 이상. 단골 환자 의존도 높음.</p>
+                            </div>
+                            <div class="rounded-lg border border-emerald-500/40 bg-slate-900/40 p-3">
+                                <div class="text-[11px] font-bold text-white mb-2">내 약국</div>
+                                <div class="space-y-2 text-[11px]">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-300">OTC 매입 비중</span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-white">21%</span>
+                                            <span class="text-[10px] font-bold text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-full">-11%p</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-300">건기식 매입 비중</span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-white">9%</span>
+                                            <span class="text-[10px] font-bold text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-full">-9%p</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-300">ETC 매입 비중</span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-white">58%</span>
+                                            <span class="text-[10px] font-bold text-amber-200 bg-amber-500/20 px-2 py-0.5 rounded-full">+8%p</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <!-- Card 4 -->
-                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-yellow-500">
-                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-crown text-yellow-400"></i></div>
-                            <div>
-                                <div class="flex justify-between items-center w-full mb-1">
-                                    <h4 class="text-sm font-bold text-white">프리미엄 실버형 (88%)</h4>
-                                </div>
-                                <p class="text-xs text-gray-400">소득 상위 20% 지역 + 노인 인구. 고가 건기식 및 프리미엄 드링크 구매력 높음.</p>
+                        <p class="mt-3 text-[11px] text-slate-300">
+                            내 약국은 유사그룹 상위 퍼포머 대비 OTC/건기식 비중이 낮고, ETC 의존도는 높습니다.
+                        </p>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-700 bg-slate-800 p-4">
+                        <div class="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+                            <h4 class="text-sm font-bold text-white">상위 퍼포머 카테고리 인사이트</h4>
+                            <span class="text-[10px] text-slate-400">상위 20% 약국 공통 매입 특성 (최근 12개월, 동일 입지·면적 조건)</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="rounded-lg border border-emerald-500/40 bg-slate-900/40 p-3">
+                                <div class="text-[11px] font-bold text-emerald-300 mb-2">OTC 공통 Top4</div>
+                                <ul class="space-y-2 text-[11px] text-slate-200">
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-[10px] font-bold bg-emerald-500/20 text-emerald-200 px-2 py-0.5 rounded-full">해열·진통제</span>
+                                        <span class="text-slate-300">상비 품목 회전율 관리로 재구매 강화</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-[10px] font-bold bg-emerald-500/20 text-emerald-200 px-2 py-0.5 rounded-full">감기/호흡기</span>
+                                        <span class="text-slate-300">시즌 전 선제 발주 + 진열 집중</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-[10px] font-bold bg-emerald-500/20 text-emerald-200 px-2 py-0.5 rounded-full">소화기/위장</span>
+                                        <span class="text-slate-300">복약 설명과 세트 진열이 효과적</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-[10px] font-bold bg-emerald-500/20 text-emerald-200 px-2 py-0.5 rounded-full">피부/상처 케어</span>
+                                        <span class="text-slate-300">파스·연고 교차 제안율 상승</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="rounded-lg border border-amber-500/40 bg-slate-900/40 p-3">
+                                <div class="text-[11px] font-bold text-amber-300 mb-2">건기식 공통 Top4</div>
+                                <ul class="space-y-2 text-[11px] text-slate-200">
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-[10px] font-bold bg-amber-500/20 text-amber-200 px-2 py-0.5 rounded-full">비타민B군</span>
+                                        <span class="text-slate-300">피로/활력 상담 동선에 배치</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-[10px] font-bold bg-amber-500/20 text-amber-200 px-2 py-0.5 rounded-full">유산균</span>
+                                        <span class="text-slate-300">항생제/소화제와 연계 제안</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-[10px] font-bold bg-amber-500/20 text-amber-200 px-2 py-0.5 rounded-full">루테인/눈건강</span>
+                                        <span class="text-slate-300">중장년 고객군 핵심 품목</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-[10px] font-bold bg-amber-500/20 text-amber-200 px-2 py-0.5 rounded-full">오메가3/혈행</span>
+                                        <span class="text-slate-300">만성질환 상담시 자연스러운 확장</span>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
-                        <!-- Card 5 -->
-                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-sky-500">
-                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-cloud-sun text-sky-400"></i></div>
-                            <div>
-                                <div class="flex justify-between items-center w-full mb-1">
-                                    <h4 class="text-sm font-bold text-white">날씨 민감형 (85%)</h4>
-                                </div>
-                                <p class="text-xs text-gray-400">기온 급변 시 호흡기 질환 환자 즉각 반응. 날씨 기반 재고 관리 필요.</p>
-                            </div>
-                        </div>
+                    </div>
+
+                    <div class="text-[11px] text-slate-400 leading-relaxed bg-slate-800 border border-slate-700 rounded-lg p-3">
+                        <div class="font-bold text-slate-200 mb-1">유의사항</div>
+                        <div>군집은 상대적 거리 기반이며 절대적 품질 지표가 아닙니다.</div>
+                        <div>실제 서비스는 더 많은 변수와 실시간 데이터로 확장 가능합니다.</div>
                     </div>
                 </div>
             </section>
@@ -1506,7 +1691,110 @@
             }
         });
 
-        // --- 5. Inventory Prediction Chart (AI) ---
+        // --- 5. Peer Group Map (Ontology-based) ---
+        const peerClusterMeta = [
+            { id: 'chronic', label: '병원 밀집-만성 처방형', color: '#38BDF8', center: { x: 22, y: 65 }, count: 24 },
+            { id: 'specialty', label: '전문과 집중-고난도 조제형', color: '#A78BFA', center: { x: 62, y: 58 }, count: 22 },
+            { id: 'otc', label: '생활밀착 OTC-계절성형', color: '#34D399', center: { x: 58, y: 28 }, count: 22 },
+            { id: 'wellness', label: '건기식/웰니스 프리미엄형', color: '#FBBF24', center: { x: 78, y: 82 }, count: 20 },
+            { id: 'price', label: '가격민감-대체조달형', color: '#FB7185', center: { x: 40, y: 15 }, count: 22 }
+        ];
+
+        const clampValue = (value, min, max) => Math.min(Math.max(value, min), max);
+        const generateClusterPoints = (cluster, spread = 18) => {
+            const points = [];
+            for (let i = 0; i < cluster.count; i += 1) {
+                const angle = (i * 137.5) * (Math.PI / 180);
+                const radius = 6 + (i % 12) * (spread / 12);
+                const x = clampValue(cluster.center.x + Math.cos(angle) * radius, 5, 95);
+                const y = clampValue(cluster.center.y + Math.sin(angle) * radius, 5, 95);
+                points.push({ x, y });
+            }
+            return points;
+        };
+
+        const myPharmacyPoint = { x: 45, y: 60 };
+
+        const peerMapDatasets = peerClusterMeta.map((cluster) => ({
+            label: cluster.label,
+            data: generateClusterPoints(cluster),
+            backgroundColor: cluster.color,
+            borderColor: cluster.color,
+            pointRadius: 3,
+            pointHoverRadius: 4,
+            pointBorderWidth: 0
+        }));
+
+        peerMapDatasets.unshift({
+            label: '내 약국 Glow',
+            data: [myPharmacyPoint],
+            backgroundColor: 'rgba(255, 255, 255, 0.18)',
+            borderColor: 'transparent',
+            pointRadius: 10,
+            pointHoverRadius: 10,
+            pointBorderWidth: 0
+        });
+
+        peerMapDatasets.push({
+            label: '내 약국',
+            data: [myPharmacyPoint],
+            backgroundColor: '#ffffff',
+            borderColor: '#0ea5e9',
+            pointRadius: 6,
+            pointHoverRadius: 7,
+            pointBorderWidth: 2,
+            order: 10
+        });
+
+        const peerMapChartEl = document.getElementById('peerMapChart');
+        if (peerMapChartEl) {
+            window.__pharmxaiCharts['peerMapChart'] = new Chart(peerMapChartEl, {
+                type: 'scatter',
+                data: {
+                    datasets: peerMapDatasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => context.dataset?.label || '유사그룹'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            min: 0,
+                            max: 100,
+                            grid: { color: 'rgba(148, 163, 184, 0.18)' },
+                            ticks: { display: false },
+                            title: {
+                                display: true,
+                                text: '병원 영향도',
+                                color: '#cbd5e1',
+                                font: { size: 10, weight: 'bold', family: "'Noto Sans KR'" }
+                            }
+                        },
+                        y: {
+                            min: 0,
+                            max: 100,
+                            grid: { color: 'rgba(148, 163, 184, 0.18)' },
+                            ticks: { display: false },
+                            title: {
+                                display: true,
+                                text: 'OTC/건기식 비중',
+                                color: '#cbd5e1',
+                                font: { size: 10, weight: 'bold', family: "'Noto Sans KR'" }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- 6. Inventory Prediction Chart (AI) ---
         window.__pharmxaiCharts['inventoryPredictionChart'] = new Chart(document.getElementById('inventoryPredictionChart'), {
             type: 'line',
             data: {
